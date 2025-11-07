@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,12 +14,17 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        h1 { color: #00ff00; }
+
+        h1 {
+            color: #00ff00;
+        }
+
         .input-group {
             margin: 20px 0;
             display: flex;
             gap: 10px;
         }
+
         input {
             flex: 1;
             padding: 10px;
@@ -27,6 +33,7 @@
             color: #00ff00;
             font-family: inherit;
         }
+
         button {
             padding: 10px 20px;
             background: #00ff00;
@@ -35,7 +42,11 @@
             cursor: pointer;
             font-weight: bold;
         }
-        button:hover { background: #00cc00; }
+
+        button:hover {
+            background: #00cc00;
+        }
+
         .output {
             background: #0a0a0a;
             padding: 20px;
@@ -46,19 +57,32 @@
             max-height: 600px;
             overflow-y: auto;
         }
-        .success { color: #00ff00; }
-        .error { color: #ff3333; }
-        .warning { color: #ffaa00; }
-        .info { color: #00aaff; }
+
+        .success {
+            color: #00ff00;
+        }
+
+        .error {
+            color: #ff3333;
+        }
+
+        .warning {
+            color: #ffaa00;
+        }
+
+        .info {
+            color: #00aaff;
+        }
     </style>
 </head>
+
 <body>
     <h1>🔍 RSS Feed Diagnostic Tool</h1>
     <p>Test any URL to see if it returns valid RSS/XML or HTML</p>
 
     <div class="input-group">
-        <input type="text" id="feedUrl" placeholder="Enter feed URL to test..." 
-               value="https://podcast.supersoul.top/admin.php">
+        <input type="text" id="feedUrl" placeholder="Enter feed URL to test..."
+            value="https://podcast.supersoul.top/admin.php">
         <button onclick="testFeed()">Test Feed</button>
     </div>
 
@@ -86,24 +110,24 @@
         async function testFeed() {
             const url = document.getElementById('feedUrl').value;
             const output = document.getElementById('output');
-            
+
             output.innerHTML = `<span class="info">Testing: ${url}</span>\n\n`;
-            
+
             const proxies = [
                 { name: 'CorsProxy.io', url: `https://corsproxy.io/?${encodeURIComponent(url)}` },
                 { name: 'AllOrigins', url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}` }
             ];
-            
+
             for (const proxy of proxies) {
                 try {
                     output.innerHTML += `<span class="info">Trying ${proxy.name}...</span>\n`;
-                    
+
                     const response = await fetch(proxy.url);
                     const contentType = response.headers.get('content-type');
-                    
+
                     output.innerHTML += `<span class="warning">Status: ${response.status}</span>\n`;
                     output.innerHTML += `<span class="warning">Content-Type: ${contentType}</span>\n\n`;
-                    
+
                     let text;
                     if (proxy.name === 'AllOrigins') {
                         const json = await response.json();
@@ -111,25 +135,25 @@
                     } else {
                         text = await response.text();
                     }
-                    
+
                     // Check if it's HTML or XML
-                    const isHTML = text.trim().toLowerCase().startsWith('<!doctype html') || 
-                                   text.trim().toLowerCase().startsWith('<html');
-                    const isXML = text.trim().startsWith('<?xml') || 
-                                  text.includes('<rss') || 
-                                  text.includes('<feed');
-                    
+                    const isHTML = text.trim().toLowerCase().startsWith('<!doctype html') ||
+                        text.trim().toLowerCase().startsWith('<html');
+                    const isXML = text.trim().startsWith('<?xml') ||
+                        text.includes('<rss') ||
+                        text.includes('<feed');
+
                     if (isHTML) {
                         output.innerHTML += `<span class="error">❌ RETURNED HTML (Not a feed!)</span>\n\n`;
                         output.innerHTML += `<span class="error">First 500 characters:</span>\n`;
                         output.innerHTML += text.substring(0, 500) + '\n\n';
                     } else if (isXML) {
                         output.innerHTML += `<span class="success">✅ LOOKS LIKE VALID RSS/XML!</span>\n\n`;
-                        
+
                         // Parse and show details
                         const parser = new DOMParser();
                         const xmlDoc = parser.parseFromString(text, 'text/xml');
-                        
+
                         const parserError = xmlDoc.querySelector('parsererror');
                         if (parserError) {
                             output.innerHTML += `<span class="error">⚠️ XML parsing error</span>\n`;
@@ -137,41 +161,42 @@
                         } else {
                             const channels = xmlDoc.querySelectorAll('channel');
                             const items = xmlDoc.querySelectorAll('item');
-                            
+
                             output.innerHTML += `<span class="success">Channels found: ${channels.length}</span>\n`;
                             output.innerHTML += `<span class="success">Episodes found: ${items.length}</span>\n\n`;
-                            
+
                             if (channels.length > 0) {
                                 const channel = channels[0];
                                 const title = channel.querySelector('title')?.textContent;
                                 const desc = channel.querySelector('description')?.textContent;
-                                
+
                                 output.innerHTML += `<span class="info">Title: ${title}</span>\n`;
                                 output.innerHTML += `<span class="info">Description: ${desc?.substring(0, 100)}...</span>\n\n`;
                             }
-                            
+
                             output.innerHTML += `<span class="success">🎉 THIS IS A VALID RSS FEED!</span>\n`;
                             output.innerHTML += `<span class="success">USE THIS URL IN YOUR PLAYER!</span>\n\n`;
                         }
-                        
+
                         output.innerHTML += `<span class="info">Full XML (first 1000 chars):</span>\n`;
                         output.innerHTML += text.substring(0, 1000) + '...\n';
-                        
+
                     } else {
                         output.innerHTML += `<span class="warning">⚠️ Unknown content type</span>\n\n`;
                         output.innerHTML += text.substring(0, 500) + '\n';
                     }
-                    
+
                     break; // Success, stop trying other proxies
-                    
+
                 } catch (error) {
                     output.innerHTML += `<span class="error">${proxy.name} failed: ${error.message}</span>\n`;
                 }
             }
         }
-        
+
         // Auto-test on load
         window.onload = () => testFeed();
     </script>
 </body>
+
 </html>

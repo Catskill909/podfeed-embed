@@ -1,4 +1,5 @@
 <?php
+
 /**
  * RSS Feed Proxy
  * Fetches RSS feeds server-side to avoid CORS issues

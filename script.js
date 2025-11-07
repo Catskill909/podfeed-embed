@@ -52,7 +52,7 @@ function formatTime(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    
+
     if (hrs > 0) {
         return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
@@ -95,23 +95,23 @@ function showLoading(show = true, message = 'Loading podcasts...') {
 async function fetchWithFallback(url) {
     // Determine base URL for local proxy
     const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
-    
+
     const proxies = [
-        { 
-            name: 'Local Proxy', 
-            url: `${baseUrl}proxy.php?url=${encodeURIComponent(url)}`, 
+        {
+            name: 'Local Proxy',
+            url: `${baseUrl}proxy.php?url=${encodeURIComponent(url)}`,
             parseJson: false,
             getContents: (data) => data
         },
-        { 
-            name: 'CorsProxy.io', 
-            url: `https://corsproxy.io/?${encodeURIComponent(url)}`, 
+        {
+            name: 'CorsProxy.io',
+            url: `https://corsproxy.io/?${encodeURIComponent(url)}`,
             parseJson: false,
             getContents: (data) => data
         },
-        { 
-            name: 'AllOrigins', 
-            url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, 
+        {
+            name: 'AllOrigins',
+            url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
             parseJson: true,
             getContents: (data) => {
                 // Check if content is base64 encoded (starts with data:)
@@ -128,14 +128,14 @@ async function fetchWithFallback(url) {
                 return data.contents;
             }
         },
-        { 
-            name: 'CodeTabs', 
-            url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, 
+        {
+            name: 'CodeTabs',
+            url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
             parseJson: false,
             getContents: (data) => data
         }
     ];
-    
+
     let lastError;
     for (const proxy of proxies) {
         try {
@@ -145,7 +145,7 @@ async function fetchWithFallback(url) {
                 console.warn(`${proxy.name} returned status ${response.status}`);
                 continue;
             }
-            
+
             const data = proxy.parseJson ? await response.json() : await response.text();
             const contents = proxy.getContents(data);
             console.log(`✓ Successfully fetched via ${proxy.name}`);
@@ -155,45 +155,45 @@ async function fetchWithFallback(url) {
             lastError = error;
         }
     }
-    
+
     throw new Error(`All CORS proxies failed. Last error: ${lastError?.message}`);
 }
 
 async function parseMasterFeed(xmlDoc) {
     const items = xmlDoc.querySelectorAll('item');
-    
+
     console.log(`Found ${items.length} podcast feeds in master list`);
-    
+
     // Extract all feed URLs first
     const feedList = [];
     items.forEach((item, i) => {
         const feedUrl = item.querySelector('link')?.textContent?.trim();
         const title = item.querySelector('title')?.textContent || `Podcast ${i + 1}`;
         const description = item.querySelector('description')?.textContent || '';
-        
+
         if (feedUrl) {
             feedList.push({ url: feedUrl, title, description, id: i });
         }
     });
-    
+
     if (feedList.length === 0) {
         console.error('No valid podcast feeds found in master list');
         return [];
     }
-    
+
     // Load FIRST podcast immediately so user sees content quickly
     console.log(`📻 Loading first podcast: ${feedList[0].title}`);
     showLoading(true, `Loading ${feedList[0].title}...`);
-    
+
     const firstPodcast = await loadSinglePodcast(feedList[0]);
     const podcasts = firstPodcast ? [firstPodcast] : [];
-    
+
     // Start loading remaining podcasts in background
     if (feedList.length > 1) {
         console.log(`🔄 Loading ${feedList.length - 1} more podcasts in background...`);
         loadRemainingPodcastsInBackground(feedList.slice(1));
     }
-    
+
     return podcasts;
 }
 
@@ -202,13 +202,13 @@ async function loadSinglePodcast(feedInfo) {
         const feedText = await fetchWithFallback(feedInfo.url);
         const feedParser = new DOMParser();
         const feedXml = feedParser.parseFromString(feedText, 'text/xml');
-        
+
         const parserError = feedXml.querySelector('parsererror');
         if (parserError) {
             console.warn(`❌ Failed to parse ${feedInfo.title}`);
             return null;
         }
-        
+
         const podcastData = parsePodcastFeed(feedXml, feedInfo.id);
         if (podcastData && podcastData.episodes.length > 0) {
             podcastData.title = feedInfo.title;
@@ -224,7 +224,7 @@ async function loadSinglePodcast(feedInfo) {
 function loadRemainingPodcastsInBackground(feedList) {
     let loaded = 1; // First podcast already loaded
     const total = feedList.length + 1;
-    
+
     // Load podcasts one at a time in background
     (async () => {
         for (const feedInfo of feedList) {
@@ -232,13 +232,13 @@ function loadRemainingPodcastsInBackground(feedList) {
             if (podcast) {
                 state.podcasts.push(podcast);
                 loaded++;
-                
+
                 // Add to dropdown dynamically
                 const option = document.createElement('option');
                 option.value = state.podcasts.length - 1;
                 option.textContent = podcast.title;
                 elements.podcastSelect.appendChild(option);
-                
+
                 console.log(`📥 Progress: ${loaded}/${total} podcasts loaded`);
             }
         }
@@ -252,7 +252,7 @@ function parsePodcastFeed(xmlDoc, podcastId) {
         console.warn('No channel found in feed');
         return null;
     }
-    
+
     const podcast = {
         id: podcastId,
         title: channel.querySelector('title')?.textContent || 'Untitled Podcast',
@@ -261,7 +261,7 @@ function parsePodcastFeed(xmlDoc, podcastId) {
         link: channel.querySelector('link')?.textContent || '',
         episodes: []
     };
-    
+
     const items = channel.querySelectorAll('item');
     items.forEach((item, episodeIndex) => {
         const episode = parseEpisode(item, episodeIndex);
@@ -269,13 +269,13 @@ function parsePodcastFeed(xmlDoc, podcastId) {
             podcast.episodes.push(episode);
         }
     });
-    
+
     return podcast;
 }
 
 async function fetchRSSFeed() {
     showLoading(true);
-    
+
     // Check if running from file:// protocol
     if (window.location.protocol === 'file:') {
         const errorMsg = 'Please run from a local server (http://localhost) not directly from file system. See player-errors.md for setup instructions.';
@@ -285,17 +285,17 @@ async function fetchRSSFeed() {
         showLoading(false);
         return;
     }
-    
+
     try {
         // Master feed containing links to individual podcast feeds
         const masterFeedUrl = 'https://podcast.supersoul.top/feed.php';
         console.log('Fetching master feed from:', masterFeedUrl);
-        
+
         const text = await fetchWithFallback(masterFeedUrl);
-        
+
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, 'text/xml');
-        
+
         // Check for parsing errors
         const parserError = xmlDoc.querySelector('parsererror');
         if (parserError) {
@@ -303,21 +303,21 @@ async function fetchRSSFeed() {
             console.log('XML content:', text.substring(0, 500));
             throw new Error('Error parsing master feed');
         }
-        
+
         // Parse master feed to get list of podcast feed URLs
         state.podcasts = await parseMasterFeed(xmlDoc);
-        
+
         if (state.podcasts.length === 0) {
             console.log('Parsed XML:', xmlDoc);
             throw new Error('No podcasts found in feed');
         }
-        
+
         populatePodcastDropdown();
         selectPodcast(0); // Load first podcast by default
         showLoading(false);
     } catch (error) {
         console.error('❌ Error fetching RSS feed:', error);
-        
+
         let userMessage = 'Failed to load podcasts: ';
         if (error.message.includes('CORS') || error.message.includes('fetch')) {
             userMessage += 'Network access blocked. Make sure you\'re running from http://localhost (see player-errors.md)';
@@ -326,7 +326,7 @@ async function fetchRSSFeed() {
         } else {
             userMessage += error.message;
         }
-        
+
         showError(userMessage);
         showLoading(false);
     }
@@ -338,32 +338,32 @@ function getChannelImage(channel) {
     // Try multiple ways to get the image
     const imageUrl = channel.querySelector('image url')?.textContent;
     if (imageUrl) return imageUrl;
-    
+
     const itunesImage = channel.querySelector('itunes\\:image, image[href]');
     if (itunesImage) {
         return itunesImage.getAttribute('href') || itunesImage.textContent;
     }
-    
+
     return '';
 }
 
 function parseEpisode(item, episodeIndex) {
     const enclosure = item.querySelector('enclosure');
-    
+
     // Get description from multiple possible elements
-    let description = item.querySelector('description')?.textContent || 
-                     item.querySelector('content\\:encoded')?.textContent || 
-                     item.querySelector('summary')?.textContent || '';
-    
+    let description = item.querySelector('description')?.textContent ||
+        item.querySelector('content\\:encoded')?.textContent ||
+        item.querySelector('summary')?.textContent || '';
+
     description = stripHtml(description);
-    
+
     // Get duration
-    let duration = item.querySelector('itunes\\:duration')?.textContent || 
-                  item.querySelector('duration')?.textContent || '';
-    
+    let duration = item.querySelector('itunes\\:duration')?.textContent ||
+        item.querySelector('duration')?.textContent || '';
+
     // Get episode image (iTunes compliant)
     let image = item.querySelector('itunes\\:image')?.getAttribute('href') || '';
-    
+
     const episode = {
         id: episodeIndex,
         title: item.querySelector('title')?.textContent || 'Untitled Episode',
@@ -374,7 +374,7 @@ function parseEpisode(item, episodeIndex) {
         type: enclosure?.getAttribute('type') || 'audio/mpeg',
         image: image
     };
-    
+
     return episode;
 }
 
@@ -383,7 +383,7 @@ function parseEpisode(item, episodeIndex) {
 // ==========================================
 function populatePodcastDropdown() {
     elements.podcastSelect.innerHTML = '';
-    
+
     state.podcasts.forEach((podcast, index) => {
         const option = document.createElement('option');
         option.value = index;
@@ -395,16 +395,16 @@ function populatePodcastDropdown() {
 function selectPodcast(index) {
     state.currentPodcast = state.podcasts[index];
     if (!state.currentPodcast) return;
-    
+
     // Pause any currently playing audio
     if (state.isPlaying) {
         elements.audioElement.pause();
     }
-    
+
     elements.podcastSelect.value = index;
     updatePodcastMetadata();
     renderEpisodesList();
-    
+
     // Load first episode
     if (state.currentPodcast.episodes.length > 0) {
         loadEpisode(state.currentPodcast.episodes[0]);
@@ -413,7 +413,7 @@ function selectPodcast(index) {
 
 function updatePodcastMetadata() {
     if (!state.currentPodcast) return;
-    
+
     // Update cover art
     if (state.currentPodcast.image) {
         elements.coverArt.src = state.currentPodcast.image;
@@ -424,7 +424,7 @@ function updatePodcastMetadata() {
     } else {
         elements.coverArt.classList.remove('loaded');
     }
-    
+
     // Update episode count
     const episodeCount = state.currentPodcast.episodes.length;
     elements.episodeCount.textContent = `${episodeCount} episode${episodeCount !== 1 ? 's' : ''}`;
@@ -443,9 +443,9 @@ function renderEpisodesList() {
         `;
         return;
     }
-    
+
     elements.episodesList.innerHTML = '';
-    
+
     state.currentPodcast.episodes.forEach(episode => {
         const episodeElement = createEpisodeElement(episode);
         elements.episodesList.appendChild(episodeElement);
@@ -456,18 +456,18 @@ function createEpisodeElement(episode) {
     const div = document.createElement('div');
     div.className = 'episode-item';
     div.setAttribute('data-episode-id', episode.id);
-    
+
     if (state.currentEpisode && state.currentEpisode.id === episode.id) {
         div.classList.add('active');
     }
-    
+
     const formattedDate = episode.pubDate ? formatDate(episode.pubDate) : '';
     const description = episode.description || 'No description available';
     const duration = episode.duration ? formatDuration(episode.duration) : '';
-    
+
     // Use episode image or fallback to podcast image
     const episodeImage = episode.image || state.currentPodcast.image || '';
-    
+
     div.innerHTML = `
         ${episodeImage ? `<img src="${episodeImage}" alt="${episode.title}" class="episode-image" onerror="this.style.display='none'">` : ''}
         <div class="episode-content">
@@ -484,18 +484,18 @@ function createEpisodeElement(episode) {
             ${duration ? `<div class="episode-duration">${duration}</div>` : ''}
         </div>
     `;
-    
+
     // Check if description is truncated and show expand button
     const descriptionEl = div.querySelector('.episode-description');
     const expandBtn = div.querySelector('.expand-description-btn');
-    
+
     // Wait for next frame to check if text is truncated
     setTimeout(() => {
         if (descriptionEl.scrollHeight > descriptionEl.clientHeight) {
             expandBtn.classList.remove('hidden');
         }
     }, 0);
-    
+
     // Handle expand/collapse
     expandBtn.addEventListener('click', (e) => {
         e.stopPropagation(); // Don't trigger episode load
@@ -509,14 +509,14 @@ function createEpisodeElement(episode) {
             expandBtn.setAttribute('aria-label', 'Expand description');
         }
     });
-    
+
     // Load episode on click (but not on expand button)
     div.addEventListener('click', (e) => {
         if (!e.target.closest('.expand-description-btn')) {
             loadEpisode(episode);
         }
     });
-    
+
     return div;
 }
 
@@ -534,21 +534,21 @@ function formatDuration(duration) {
 // ==========================================
 function loadEpisode(episode) {
     state.currentEpisode = episode;
-    
+
     // Pause current audio if playing
     if (state.isPlaying) {
         elements.audioElement.pause();
     }
-    
+
     // Reset audio state
     state.isPlaying = false;
     elements.audioElement.currentTime = 0;
-    
+
     // Update metadata
     elements.episodeTitle.textContent = episode.title;
     elements.podcastTitle.textContent = state.currentPodcast.title;
     elements.episodeDate.textContent = episode.pubDate ? formatDate(episode.pubDate) : '';
-    
+
     // Update active episode in list
     document.querySelectorAll('.episode-item').forEach(item => {
         item.classList.remove('active');
@@ -557,11 +557,11 @@ function loadEpisode(episode) {
             item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     });
-    
+
     // Load audio
     elements.audioElement.src = episode.audioUrl;
     elements.audioElement.load();
-    
+
     // Reset UI to stopped state
     updatePlayPauseButton(false);
     elements.progressFilled.style.width = '0%';
@@ -569,17 +569,17 @@ function loadEpisode(episode) {
     elements.progressBuffered.style.width = '0%';
     elements.currentTime.textContent = '0:00';
     elements.durationTime.textContent = '0:00';
-    
+
     // Enable download button
     elements.downloadBtn.disabled = false;
-    
+
     // Update embed code
     updateEmbedCode();
 }
 
 function togglePlayPause() {
     if (!state.currentEpisode) return;
-    
+
     if (state.isPlaying) {
         elements.audioElement.pause();
     } else {
@@ -606,7 +606,7 @@ function skipForward() {
 
 function updateProgress() {
     const { currentTime, duration } = elements.audioElement;
-    
+
     if (!isNaN(duration) && duration > 0) {
         const percent = (currentTime / duration) * 100;
         elements.progressFilled.style.width = `${percent}%`;
@@ -618,7 +618,7 @@ function updateProgress() {
 
 function updateBuffered() {
     const { buffered, duration } = elements.audioElement;
-    
+
     if (buffered.length > 0 && !isNaN(duration) && duration > 0) {
         const bufferedEnd = buffered.end(buffered.length - 1);
         const percent = (bufferedEnd / duration) * 100;
@@ -639,7 +639,7 @@ function updateVolume(event) {
     const volume = parseInt(event.target.value) / 100;
     elements.audioElement.volume = volume;
     updateVolumeIcon(volume);
-    
+
     // Update CSS variable for slider track
     elements.volumeSlider.style.setProperty('--volume-percent', `${event.target.value}%`);
 }
@@ -680,7 +680,7 @@ function setPlaybackSpeed(speed) {
     state.currentSpeed = speed;
     elements.audioElement.playbackRate = speed;
     elements.speedBtn.querySelector('.speed-text').textContent = `${speed}x`;
-    
+
     // Update active state
     document.querySelectorAll('.speed-option').forEach(option => {
         option.classList.remove('active');
@@ -688,7 +688,7 @@ function setPlaybackSpeed(speed) {
             option.classList.add('active');
         }
     });
-    
+
     elements.speedMenu.classList.add('hidden');
 }
 
@@ -697,7 +697,7 @@ function setPlaybackSpeed(speed) {
 // ==========================================
 function downloadEpisode() {
     if (!state.currentEpisode) return;
-    
+
     const a = document.createElement('a');
     a.href = state.currentEpisode.audioUrl;
     a.download = `${state.currentEpisode.title}.mp3`;
@@ -715,19 +715,19 @@ function updateEmbedCode() {
     const podcastId = state.currentPodcast.id;
     const episodeId = state.currentEpisode ? state.currentEpisode.id : 0;
     const embedUrl = `${currentUrl}?podcast=${podcastId}&episode=${episodeId}`;
-    
+
     const embedCodeText = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" allowfullscreen></iframe>`;
     elements.embedCode.querySelector('code').textContent = embedCodeText;
 }
 
 async function copyEmbedCode() {
     const codeText = elements.embedCode.textContent;
-    
+
     try {
         await navigator.clipboard.writeText(codeText);
         elements.copyNotification.classList.remove('hidden');
         elements.copyEmbedBtn.querySelector('.copy-text').textContent = 'Copied!';
-        
+
         setTimeout(() => {
             elements.copyNotification.classList.add('hidden');
             elements.copyEmbedBtn.querySelector('.copy-text').textContent = 'Copy';
@@ -745,12 +745,12 @@ function loadFromUrlParams() {
     const params = new URLSearchParams(window.location.search);
     const podcastId = params.get('podcast');
     const episodeId = params.get('episode');
-    
+
     if (podcastId !== null) {
         const podcast = state.podcasts[parseInt(podcastId)];
         if (podcast) {
             selectPodcast(parseInt(podcastId));
-            
+
             if (episodeId !== null) {
                 const episode = podcast.episodes[parseInt(episodeId)];
                 if (episode) {
@@ -770,17 +770,17 @@ function handleKeyboardShortcuts(event) {
         event.preventDefault();
         togglePlayPause();
     }
-    
+
     // Arrow Left: Skip backward
     if (event.code === 'ArrowLeft') {
         skipBackward();
     }
-    
+
     // Arrow Right: Skip forward
     if (event.code === 'ArrowRight') {
         skipForward();
     }
-    
+
     // M: Mute/Unmute
     if (event.code === 'KeyM') {
         toggleMute();
@@ -795,7 +795,7 @@ function initEventListeners() {
     elements.podcastSelect.addEventListener('change', (e) => {
         selectPodcast(parseInt(e.target.value));
     });
-    
+
     // Audio events
     elements.audioElement.addEventListener('play', () => updatePlayPauseButton(true));
     elements.audioElement.addEventListener('pause', () => updatePlayPauseButton(false));
@@ -814,17 +814,17 @@ function initEventListeners() {
             }
         }
     });
-    
+
     // Player controls
     elements.playPauseBtn.addEventListener('click', togglePlayPause);
     elements.skipBackwardBtn.addEventListener('click', skipBackward);
     elements.skipForwardBtn.addEventListener('click', skipForward);
     elements.progressSlider.addEventListener('input', seekAudio);
-    
+
     // Volume controls
     elements.volumeSlider.addEventListener('input', updateVolume);
     elements.volumeBtn.addEventListener('click', toggleMute);
-    
+
     // Speed controls
     elements.speedBtn.addEventListener('click', toggleSpeedMenu);
     document.querySelectorAll('.speed-option').forEach(option => {
@@ -832,20 +832,20 @@ function initEventListeners() {
             setPlaybackSpeed(parseFloat(option.dataset.speed));
         });
     });
-    
+
     // Close speed menu when clicking outside
     document.addEventListener('click', (e) => {
         if (!elements.speedBtn.contains(e.target) && !elements.speedMenu.contains(e.target)) {
             elements.speedMenu.classList.add('hidden');
         }
     });
-    
+
     // Download
     elements.downloadBtn.addEventListener('click', downloadEpisode);
-    
+
     // Embed code
     elements.copyEmbedBtn.addEventListener('click', copyEmbedCode);
-    
+
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
 }
@@ -856,7 +856,7 @@ function initEventListeners() {
 async function init() {
     initEventListeners();
     await fetchRSSFeed();
-    
+
     // Check URL parameters
     const params = new URLSearchParams(window.location.search);
     if (params.has('podcast')) {
