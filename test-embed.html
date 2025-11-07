@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Player Embed Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #BB86FC;
+        }
+        iframe {
+            border: 2px solid #BB86FC;
+            border-radius: 8px;
+            display: block;
+            margin: 20px 0;
+        }
+        .note {
+            background: #fffbea;
+            padding: 15px;
+            border-left: 4px solid #f59e0b;
+            margin: 10px 0;
+        }
+        .success {
+            background: #ecfdf5;
+            border-left-color: #10b981;
+        }
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎧 Podcast Player - Embed Test Page</h1>
+    
+    <div class="note success">
+        <strong>✅ This page tests the player in an embedded (iframe) context</strong><br>
+        If you can see the player below and it loads podcasts without errors, your embed system is working perfectly!
+    </div>
+
+    <!-- Test 1: Basic Embed -->
+    <div class="test-section">
+        <h2>Test 1: Basic Player Embed</h2>
+        <p>Player with default settings (first podcast loaded):</p>
+        <iframe 
+            src="http://localhost:8000" 
+            width="100%" 
+            height="650" 
+            frameborder="0"
+            allowfullscreen>
+        </iframe>
+        <pre>&lt;iframe src="http://localhost:8000" width="100%" height="650"&gt;&lt;/iframe&gt;</pre>
+    </div>
+
+    <!-- Test 2: With Parameters -->
+    <div class="test-section">
+        <h2>Test 2: Specific Podcast & Episode</h2>
+        <p>Player loading podcast #0, episode #2:</p>
+        <iframe 
+            src="http://localhost:8000?podcast=0&episode=2" 
+            width="100%" 
+            height="650" 
+            frameborder="0">
+        </iframe>
+        <pre>&lt;iframe src="http://localhost:8000?podcast=0&episode=2" width="100%" height="650"&gt;&lt;/iframe&gt;</pre>
+    </div>
+
+    <!-- Test 3: Responsive Embed -->
+    <div class="test-section">
+        <h2>Test 3: Responsive Embed (16:9 ratio)</h2>
+        <p>Player that maintains aspect ratio:</p>
+        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+            <iframe 
+                src="http://localhost:8000" 
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                frameborder="0">
+            </iframe>
+        </div>
+        <pre>&lt;div style="position: relative; padding-bottom: 56.25%; height: 0;"&gt;
+    &lt;iframe src="http://localhost:8000" 
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"&gt;
+    &lt;/iframe&gt;
+&lt;/div&gt;</pre>
+    </div>
+
+    <!-- Test 4: Smaller Embed -->
+    <div class="test-section">
+        <h2>Test 4: Compact Embed (400px width)</h2>
+        <p>Player in a smaller container:</p>
+        <div style="max-width: 400px;">
+            <iframe 
+                src="http://localhost:8000" 
+                width="100%" 
+                height="700" 
+                frameborder="0">
+            </iframe>
+        </div>
+        <pre>&lt;iframe src="http://localhost:8000" width="400" height="700"&gt;&lt;/iframe&gt;</pre>
+    </div>
+
+    <div class="note">
+        <strong>🧪 Testing Checklist:</strong><br>
+        ✓ Can you see the player in each iframe above?<br>
+        ✓ Does the podcast dropdown populate?<br>
+        ✓ Can you play audio?<br>
+        ✓ Can you switch between podcasts?<br>
+        ✓ Are there any CORS errors in console? (F12)<br>
+        <br>
+        <strong>Open browser console (F12) and look for:</strong><br>
+        <code>✓ Successfully fetched via Local Proxy</code>
+    </div>
+
+    <div class="note success">
+        <strong>🚀 When You Deploy Live:</strong><br>
+        1. Upload all files to your web host<br>
+        2. Replace <code>http://localhost:8000</code> with your actual domain<br>
+        3. Use the exact same iframe code<br>
+        4. Embeds will work on ANY website!
+    </div>
+
+    <script>
+        // Log when iframes load
+        document.querySelectorAll('iframe').forEach((iframe, index) => {
+            iframe.addEventListener('load', () => {
+                console.log(`✓ Test ${index + 1} iframe loaded successfully`);
+            });
+        });
+    </script>
+</body>
+</html>
