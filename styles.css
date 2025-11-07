@@ -95,6 +95,10 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 28px;
 }
 
+.app-title i {
+    font-size: 24px;
+}
+
 .main-content {
     display: grid;
     grid-template-columns: 380px 1fr;
@@ -385,7 +389,8 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--primary);
 }
 
-.control-btn .material-symbols-outlined {
+.control-btn .material-symbols-outlined,
+.control-btn i {
     font-size: 20px;
 }
 
@@ -397,13 +402,30 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 50%;
 }
 
-#play-pause-btn:hover {
-    background: var(--primary-dark);
-    transform: scale(1.05);
+/* Font Awesome Play/Pause Button - White Circle with Black Icon */
+.control-btn-primary {
+    width: 56px;
+    height: 56px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    position: relative;
 }
 
-#play-pause-btn .material-symbols-outlined {
-    font-size: 28px;
+.control-btn-primary:hover {
+    background: transparent;
+    transform: scale(1.08);
+}
+
+.control-btn-primary i {
+    font-size: 56px;
+    color: #FFFFFF;
+    transition: all var(--transition);
+}
+
+.control-btn-primary:hover i {
+    color: var(--primary);
+    filter: drop-shadow(0 0 8px rgba(187, 134, 252, 0.6));
 }
 
 /* Progress Bar - Sleek Design */
@@ -735,7 +757,8 @@ h1, h2, h3, h4, h5, h6 {
     gap: var(--space-2);
 }
 
-.section-title .material-symbols-outlined {
+.section-title .material-symbols-outlined,
+.section-title i {
     font-size: 20px;
 }
 
@@ -776,7 +799,8 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
 }
 
-.empty-state .material-symbols-outlined {
+.empty-state .material-symbols-outlined,
+.empty-state i {
     font-size: 48px;
     opacity: 0.2;
     margin-bottom: var(--space-3);
@@ -888,12 +912,14 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--primary-dark);
 }
 
-.expand-description-btn .material-symbols-outlined {
+.expand-description-btn .material-symbols-outlined,
+.expand-description-btn i {
     font-size: 14px;
     transition: transform var(--transition);
 }
 
-.expand-description-btn.expanded .material-symbols-outlined {
+.expand-description-btn.expanded .material-symbols-outlined,
+.expand-description-btn.expanded i {
     transform: rotate(180deg);
 }
 
@@ -982,7 +1008,8 @@ h1, h2, h3, h4, h5, h6 {
     transform: scale(0.98);
 }
 
-.copy-btn .material-symbols-outlined {
+.copy-btn .material-symbols-outlined,
+.copy-btn i {
     font-size: 14px;
 }
 
@@ -1003,7 +1030,8 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
 }
 
-.copy-notification .material-symbols-outlined {
+.copy-notification .material-symbols-outlined,
+.copy-notification i {
     font-size: 18px;
 }
 
@@ -1064,7 +1092,8 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
 }
 
-.error-toast .material-symbols-outlined {
+.error-toast .material-symbols-outlined,
+.error-toast i {
     font-size: 20px;
 }
 
@@ -1204,13 +1233,13 @@ h1, h2, h3, h4, h5, h6 {
         gap: var(--space-2);
     }
     
-    #play-pause-btn {
-        width: 44px;
-        height: 44px;
+    .control-btn-primary {
+        width: 50px;
+        height: 50px;
     }
     
-    #play-pause-btn .material-symbols-outlined {
-        font-size: 24px;
+    .control-btn-primary i {
+        font-size: 50px;
     }
     
     .secondary-controls {

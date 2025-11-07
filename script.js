@@ -589,7 +589,8 @@ function togglePlayPause() {
 
 function updatePlayPauseButton(playing) {
     state.isPlaying = playing;
-    elements.playIcon.textContent = playing ? 'pause' : 'play_arrow';
+    // Font Awesome icons: fa-circle-play for play, fa-circle-pause for pause
+    elements.playIcon.className = playing ? 'fa-solid fa-circle-pause' : 'fa-solid fa-circle-play';
     elements.playPauseBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
 }
 
@@ -645,12 +646,13 @@ function updateVolume(event) {
 }
 
 function updateVolumeIcon(volume) {
+    // Font Awesome volume icons
     if (volume === 0) {
-        elements.volumeIcon.textContent = 'volume_off';
+        elements.volumeIcon.className = 'fa-solid fa-volume-xmark';
     } else if (volume < 0.5) {
-        elements.volumeIcon.textContent = 'volume_down';
+        elements.volumeIcon.className = 'fa-solid fa-volume-low';
     } else {
-        elements.volumeIcon.textContent = 'volume_up';
+        elements.volumeIcon.className = 'fa-solid fa-volume-high';
     }
 }
 
