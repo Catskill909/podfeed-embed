@@ -162,39 +162,77 @@ async function fetchWithFallback(url) {
 async function parseMasterFeed(xmlDoc) {
     const items = xmlDoc.querySelectorAll('item');
 
-    console.log(`Found ${items.length} podcast feeds in master list`);
+    console.log(`Found ${items.length} podcasts in master feed`);
 
-    // Extract all feed URLs first
-    const feedList = [];
+    // Extract ALL podcast info from master feed
+    const podcasts = [];
     items.forEach((item, i) => {
         const feedUrl = item.querySelector('link')?.textContent?.trim();
         const title = item.querySelector('title')?.textContent || `Podcast ${i + 1}`;
         const description = item.querySelector('description')?.textContent || '';
+        const coverImage = item.querySelector('enclosure[type="image/jpeg"]')?.getAttribute('url') || '';
+        const episodeCount = item.querySelector('episodeCount')?.textContent || '0';
+        const latestDate = item.querySelector('latestEpisodeDate')?.textContent || '';
 
         if (feedUrl) {
-            feedList.push({ url: feedUrl, title, description, id: i });
+            podcasts.push({
+                url: feedUrl,
+                title,
+                description,
+                id: i,
+                coverImage,
+                episodeCount: parseInt(episodeCount) || 0,
+                latestDate,
+                episodes: [] // Episodes will be loaded on demand
+            });
         }
     });
 
-    if (feedList.length === 0) {
-        console.error('No valid podcast feeds found in master list');
+    console.log(`✅ Loaded ${podcasts.length} podcasts instantly from master feed`);
+
+    if (podcasts.length === 0) {
+        console.error('No valid podcasts found in master feed');
         return [];
     }
 
-    // Load FIRST podcast immediately so user sees content quickly
-    console.log(`📻 Loading first podcast: ${feedList[0].title}`);
-    showLoading(true, `Loading ${feedList[0].title}...`);
+    // Populate dropdown immediately with ALL podcast titles
+    populatePodcastDropdown(podcasts);
 
-    const firstPodcast = await loadSinglePodcast(feedList[0]);
-    const podcasts = firstPodcast ? [firstPodcast] : [];
+    // Load FIRST podcast's episodes only
+    console.log(`📻 Loading episodes for: ${podcasts[0].title}`);
+    showLoading(true, `Loading ${podcasts[0].title}...`);
 
-    // Start loading remaining podcasts in background
-    if (feedList.length > 1) {
-        console.log(`🔄 Loading ${feedList.length - 1} more podcasts in background...`);
-        loadRemainingPodcastsInBackground(feedList.slice(1));
+    const firstWithEpisodes = await loadSinglePodcast(podcasts[0]);
+    if (firstWithEpisodes) {
+        podcasts[0].episodes = firstWithEpisodes.episodes;
+        podcasts[0].image = firstWithEpisodes.image;
     }
 
-    return podcasts;
+    // Background load episodes for remaining podcasts (NO DROPDOWN TOUCHING!)
+    if (podcasts.length > 1) {
+        console.log(`🔄 Loading episodes for ${podcasts.length - 1} more podcasts in background...`);
+        loadRemainingPodcastsInBackground(podcasts);
+    }
+
+    return podcasts; // Return ALL podcasts with first one's episodes loaded
+}
+
+function populatePodcastDropdown(podcasts) {
+    // Clear existing options except first placeholder
+    while (elements.podcastSelect.options.length > 1) {
+        elements.podcastSelect.remove(1);
+    }
+
+    // Add all podcasts to dropdown
+    podcasts.forEach(podcast => {
+        const option = document.createElement('option');
+        option.value = podcast.id;
+        option.textContent = podcast.title;
+        option.dataset.feedUrl = podcast.url;
+        elements.podcastSelect.appendChild(option);
+    });
+
+    console.log(`📋 Added ${podcasts.length} podcasts to dropdown`);
 }
 
 async function loadSinglePodcast(feedInfo) {
@@ -221,29 +259,32 @@ async function loadSinglePodcast(feedInfo) {
     return null;
 }
 
-function loadRemainingPodcastsInBackground(feedList) {
-    let loaded = 1; // First podcast already loaded
-    const total = feedList.length + 1;
+async function loadRemainingPodcastsInBackground(podcastList) {
+    console.log(`Starting background load of episodes for ${podcastList.length - 1} podcasts...`);
 
-    // Load podcasts one at a time in background
-    (async () => {
-        for (const feedInfo of feedList) {
-            const podcast = await loadSinglePodcast(feedInfo);
-            if (podcast) {
-                state.podcasts.push(podcast);
-                loaded++;
+    for (let i = 1; i < podcastList.length; i++) {
+        const podcast = podcastList[i];
 
-                // Add to dropdown dynamically
-                const option = document.createElement('option');
-                option.value = state.podcasts.length - 1;
-                option.textContent = podcast.title;
-                elements.podcastSelect.appendChild(option);
+        console.log(`Progress: ${i}/${podcastList.length - 1} - Loading episodes for ${podcast.title}`);
 
-                console.log(`📥 Progress: ${loaded}/${total} podcasts loaded`);
+        try {
+            const podcastWithEpisodes = await loadSinglePodcast(podcast);
+
+            if (podcastWithEpisodes) {
+                // Update the podcast in the list with episode data
+                podcast.episodes = podcastWithEpisodes.episodes;
+                podcast.image = podcastWithEpisodes.image;
             }
+
+            // Small delay between requests
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+        } catch (error) {
+            console.warn(`Failed to load episodes for ${podcast.title}:`, error.message);
         }
-        console.log(`🎉 All ${loaded} podcasts loaded successfully!`);
-    })();
+    }
+
+    console.log(`✅ All podcast episodes loaded successfully!`);
 }
 
 function parsePodcastFeed(xmlDoc, podcastId) {
@@ -312,7 +353,7 @@ async function fetchRSSFeed() {
             throw new Error('No podcasts found in feed');
         }
 
-        populatePodcastDropdown();
+        // Dropdown already populated in parseMasterFeed()
         selectPodcast(0); // Load first podcast by default
         showLoading(false);
     } catch (error) {
@@ -381,18 +422,7 @@ function parseEpisode(item, episodeIndex) {
 // ==========================================
 // PODCAST DROPDOWN
 // ==========================================
-function populatePodcastDropdown() {
-    elements.podcastSelect.innerHTML = '';
-
-    state.podcasts.forEach((podcast, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = podcast.title;
-        elements.podcastSelect.appendChild(option);
-    });
-}
-
-function selectPodcast(index) {
+async function selectPodcast(index) {
     state.currentPodcast = state.podcasts[index];
     if (!state.currentPodcast) return;
 
@@ -402,6 +432,20 @@ function selectPodcast(index) {
     }
 
     elements.podcastSelect.value = index;
+
+    // If episodes not loaded yet, load them now (on-demand loading)
+    if (state.currentPodcast.episodes.length === 0) {
+        showLoading(true, `Loading ${state.currentPodcast.title}...`);
+
+        const podcastWithEpisodes = await loadSinglePodcast(state.currentPodcast);
+        if (podcastWithEpisodes) {
+            state.currentPodcast.episodes = podcastWithEpisodes.episodes;
+            state.currentPodcast.image = podcastWithEpisodes.image;
+        }
+
+        showLoading(false);
+    }
+
     updatePodcastMetadata();
     renderEpisodesList();
 
@@ -477,8 +521,8 @@ function createEpisodeElement(episode) {
             </div>
             <div class="episode-description-wrapper">
                 <p class="episode-description" data-full-text="${description.replace(/"/g, '&quot;')}">${description}</p>
-                <button class="expand-description-btn hidden" aria-label="Expand description">
-                    <span class="material-symbols-outlined">expand_more</span>
+                <button class="expand-description-btn" aria-label="Expand description">
+                    <i class="fa-solid fa-chevron-down"></i>
                 </button>
             </div>
             ${duration ? `<div class="episode-duration">${duration}</div>` : ''}
@@ -492,7 +536,9 @@ function createEpisodeElement(episode) {
     // Wait for next frame to check if text is truncated
     setTimeout(() => {
         if (descriptionEl.scrollHeight > descriptionEl.clientHeight) {
-            expandBtn.classList.remove('hidden');
+            expandBtn.classList.add('visible');
+        } else {
+            expandBtn.classList.remove('visible');
         }
     }, 0);
 
@@ -500,12 +546,13 @@ function createEpisodeElement(episode) {
     expandBtn.addEventListener('click', (e) => {
         e.stopPropagation(); // Don't trigger episode load
         descriptionEl.classList.toggle('expanded');
-        const icon = expandBtn.querySelector('.material-symbols-outlined');
+        expandBtn.classList.toggle('expanded');
+        const icon = expandBtn.querySelector('i');
         if (descriptionEl.classList.contains('expanded')) {
-            icon.textContent = 'expand_less';
+            icon.className = 'fa-solid fa-chevron-up';
             expandBtn.setAttribute('aria-label', 'Collapse description');
         } else {
-            icon.textContent = 'expand_more';
+            icon.className = 'fa-solid fa-chevron-down';
             expandBtn.setAttribute('aria-label', 'Expand description');
         }
     });

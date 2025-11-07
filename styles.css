@@ -106,7 +106,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================
-   PODCAST SELECTOR - COMPACT (STICKY)
+   PODCAST SELECTOR - COMPACT INLINE (STICKY)
    ========================================== */
 .podcast-selector-section {
     position: sticky;
@@ -119,32 +119,63 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: 1px solid var(--border);
 }
 
+.selector-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    max-width: 600px;
+}
+
 .select-label {
-    font-size: 11px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
-    display: block;
+    color: var(--primary);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .select-wrapper {
     position: relative;
+    flex: 1;
+    min-width: 0;
 }
 
 #podcast-select {
     width: 100%;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-3) var(--space-5) var(--space-3) var(--space-4);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition);
     appearance: none;
+}
+
+#podcast-select option {
+    background: #1E1E1E !important;
+    color: #FFFFFF !important;
+    padding: 12px 16px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+
+#podcast-select option:hover {
+    background: #2A2A2A !important;
+}
+
+#podcast-select option:checked {
+    background: var(--primary) !important;
+    color: #000000 !important;
+    font-weight: 600 !important;
 }
 
 #podcast-select:hover {
@@ -156,6 +187,21 @@ h1, h2, h3, h4, h5, h6 {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.1);
+}
+
+.select-icon {
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-tertiary);
+    font-size: 14px;
+    transition: all var(--transition);
+}
+
+#podcast-select:focus + .select-icon {
+    color: var(--primary);
 }
 
 /* ==========================================
@@ -394,26 +440,18 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 20px;
 }
 
-#play-pause-btn {
-    width: 48px;
-    height: 48px;
-    background: var(--primary);
-    color: #000;
-    border-radius: 50%;
-}
-
 /* Font Awesome Play/Pause Button - White Circle with Black Icon */
 .control-btn-primary {
     width: 56px;
     height: 56px;
-    background: transparent;
+    background: transparent !important;
     border: none;
     padding: 0;
     position: relative;
 }
 
 .control-btn-primary:hover {
-    background: transparent;
+    background: transparent !important;
     transform: scale(1.08);
 }
 
@@ -894,27 +932,31 @@ h1, h2, h3, h4, h5, h6 {
 .expand-description-btn {
     background: none;
     border: none;
-    padding: var(--space-1);
+    padding: 0;
     margin-top: var(--space-1);
     cursor: pointer;
     color: var(--primary);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: flex;
+    display: none;
     align-items: center;
-    gap: var(--space-1);
+    justify-content: center;
+    width: 20px;
+    height: 20px;
     transition: all var(--transition);
+}
+
+.expand-description-btn.visible {
+    display: flex;
 }
 
 .expand-description-btn:hover {
     color: var(--primary-dark);
+    transform: scale(1.1);
 }
 
 .expand-description-btn .material-symbols-outlined,
 .expand-description-btn i {
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 900;
     transition: transform var(--transition);
 }
 
@@ -1148,6 +1190,17 @@ h1, h2, h3, h4, h5, h6 {
         top: 65px;
     }
     
+    .selector-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-2);
+        max-width: 100%;
+    }
+    
+    .select-label {
+        font-size: 12px;
+    }
+    
     .player-section {
         top: 140px;
     }
@@ -1204,6 +1257,16 @@ h1, h2, h3, h4, h5, h6 {
     .podcast-selector-section {
         top: 55px;
         padding: var(--space-3);
+    }
+    
+    .selector-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-2);
+    }
+    
+    .select-label {
+        font-size: 11px;
     }
     
     .player-section {
