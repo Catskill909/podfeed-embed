@@ -71,7 +71,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .app-header {
-    margin-bottom: var(--space-5);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--background);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-1);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    background: rgba(10, 10, 10, 0.95);
 }
 
 .app-title {
@@ -93,10 +102,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================
-   PODCAST SELECTOR - COMPACT
+   PODCAST SELECTOR - COMPACT (STICKY)
    ========================================== */
 .podcast-selector-section {
+    position: sticky;
+    top: 80px;
+    z-index: 50;
+    background: rgba(10, 10, 10, 0.98);
+    backdrop-filter: blur(10px);
+    padding: var(--space-4);
     margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border);
 }
 
 .select-label {
@@ -243,14 +259,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================
-   PLAYER CARD - COMPACT & SLEEK
+   PLAYER CARD - COMPACT & SLEEK (STICKY)
    ========================================== */
 .player-section {
+    position: sticky;
+    top: 80px;
+    z-index: 50;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: var(--space-5);
     box-shadow: var(--shadow-md);
+    backdrop-filter: blur(10px);
+    background: rgba(21, 21, 21, 0.98);
 }
 
 .player-main {
@@ -690,7 +711,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================
-   EPISODES SECTION - ULTRA COMPACT
+   EPISODES SECTION - ULTRA COMPACT (SCROLLABLE)
    ========================================== */
 .episodes-section {
     background: var(--surface);
@@ -698,6 +719,7 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: var(--radius-lg);
     padding: var(--space-5);
     box-shadow: var(--shadow-md);
+    overflow: hidden;
 }
 
 .section-title {
@@ -1083,8 +1105,22 @@ h1, h2, h3, h4, h5, h6 {
         padding: var(--space-3);
     }
     
+    .app-header {
+        top: 0;
+        padding-top: var(--space-3);
+        padding-bottom: var(--space-3);
+    }
+    
     .app-title {
         font-size: 20px;
+    }
+    
+    .podcast-selector-section {
+        top: 65px;
+    }
+    
+    .player-section {
+        top: 140px;
     }
     
     .player-main {
@@ -1121,7 +1157,10 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .app-header {
-        margin-bottom: var(--space-4);
+        top: 0;
+        padding-top: var(--space-2);
+        padding-bottom: var(--space-2);
+        margin-bottom: 0;
     }
     
     .app-title {
@@ -1133,7 +1172,16 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 22px;
     }
     
-    .player-section,
+    .podcast-selector-section {
+        top: 55px;
+        padding: var(--space-3);
+    }
+    
+    .player-section {
+        top: 130px;
+        padding: var(--space-4);
+    }
+    
     .episodes-section,
     .embed-section {
         padding: var(--space-4);
