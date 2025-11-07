@@ -1,4 +1,33 @@
 // ==========================================
+// THEME MANAGEMENT
+// ==========================================
+const THEME_KEY = 'podcast-player-theme';
+
+function initTheme() {
+    // Get saved theme or default to dark
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggle(savedTheme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+    updateThemeToggle(next);
+}
+
+function updateThemeToggle(theme) {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+
+    const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    toggle.setAttribute('aria-label', label);
+    toggle.setAttribute('title', label);
+}
+
+// ==========================================
 // STATE MANAGEMENT
 // ==========================================
 const state = {
@@ -921,6 +950,12 @@ function initCustomDropdown() {
 // EVENT LISTENERS
 // ==========================================
 function initEventListeners() {
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+
     // Podcast selection
     elements.podcastSelect.addEventListener('change', (e) => {
         selectPodcast(parseInt(e.target.value));
@@ -984,6 +1019,7 @@ function initEventListeners() {
 // INITIALIZATION
 // ==========================================
 async function init() {
+    initTheme(); // Initialize theme before anything else
     initEventListeners();
     await fetchRSSFeed();
 
