@@ -67,6 +67,12 @@ function formatDate(dateString) {
     return date.toLocaleDateString('en-US', options);
 }
 
+function decodeHtmlEntities(text) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+}
+
 function stripHtml(html) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
@@ -420,6 +426,7 @@ function parseEpisode(item, episodeIndex) {
         item.querySelector('summary')?.textContent || '';
 
     description = stripHtml(description);
+    description = decodeHtmlEntities(description);
 
     // Get duration
     let duration = item.querySelector('itunes\\:duration')?.textContent ||
@@ -428,9 +435,13 @@ function parseEpisode(item, episodeIndex) {
     // Get episode image (iTunes compliant)
     let image = item.querySelector('itunes\\:image')?.getAttribute('href') || '';
 
+    // Get title and decode HTML entities
+    let title = item.querySelector('title')?.textContent || 'Untitled Episode';
+    title = decodeHtmlEntities(title);
+
     const episode = {
         id: episodeIndex,
-        title: item.querySelector('title')?.textContent || 'Untitled Episode',
+        title: title,
         description: description,
         pubDate: item.querySelector('pubDate')?.textContent || '',
         audioUrl: enclosure?.getAttribute('url') || item.querySelector('link')?.textContent || '',
