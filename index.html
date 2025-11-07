@@ -30,13 +30,21 @@
             <!-- Podcast Selector -->
             <section class="podcast-selector-section">
                 <div class="selector-container">
-                    <label for="podcast-select" class="select-label">Select Podcast:</label>
-                    <div class="select-wrapper">
-                        <select id="podcast-select" class="podcast-select" aria-label="Select a podcast">
-                            <option value="">Loading podcasts...</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down select-icon"></i>
+                    <label class="select-label">Select Podcast:</label>
+                    <div class="custom-dropdown">
+                        <div class="dropdown-selected" id="dropdown-selected">
+                            <span class="selected-text">Loading podcasts...</span>
+                            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                        </div>
+                        <div class="dropdown-options" id="dropdown-options">
+                            <!-- Options will be populated by JavaScript -->
+                        </div>
                     </div>
+                    <!-- Keep original select hidden for form compatibility -->
+                    <select id="podcast-select" class="podcast-select-hidden" aria-label="Select a podcast"
+                        style="display: none;">
+                        <option value="">Loading podcasts...</option>
+                    </select>
                 </div>
             </section>
 

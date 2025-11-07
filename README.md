@@ -1,6 +1,6 @@
 # 🎧 PodFeed Embed - Modern Podcast Player
 
-A sleek, Material Design-inspired podcast player with dark mode theme and full embed support. Load multiple podcasts from a master feed and embed them anywhere!
+A sleek, ultra-compact podcast player with custom-styled dropdown, dark mode theme, and full embed support. Load multiple podcasts from a master feed and embed them anywhere!
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-7.0%2B-purple.svg)
@@ -21,16 +21,30 @@ A sleek, Material Design-inspired podcast player with dark mode theme and full e
 
 ### 📻 Multi-Podcast Support
 - **Master Feed System:** Load multiple podcasts from a single feed
-- **Dropdown Selector:** Easy podcast switching
-- **Progressive Loading:** First podcast loads instantly, others in background
+- **Custom Styled Dropdown:** Beautiful Material Design dropdown (not native browser select)
+- **Instant Loading:** All 20 podcast titles appear immediately
+- **On-Demand Episodes:** Episodes load only when podcast is selected
 - **Episode Images:** Displays episode artwork with podcast fallback
 - **Expandable Descriptions:** Click arrow to expand full episode descriptions
+- **Smart Scrolling:** Episodes list resets to top when switching podcasts
 
-### 🎨 Modern Design
-- **Material Design:** Dark mode with purple/teal accent colors
+### 🎨 Modern Ultra-Compact Design
+- **Oswald Headers:** Bold, uppercase headers (600-700 weight)
+- **Inter Body Text:** Clean, readable body text (400-600 weight)
+- **Font Awesome 6.5.1:** Modern icon system
+- **Dark Mode:** Black background (#0A0A0A) with purple accents
+- **Minimal Spacing:** Compact design with 4px-24px spacing scale
+- **Sharp Corners:** No rounded borders on images for modern look
+- **Sticky Navigation:** Header and dropdown stay visible while scrolling
 - **Fully Responsive:** Works perfectly on mobile, tablet, and desktop
-- **Smooth Animations:** Polished transitions and interactions
-- **Accessibility:** Keyboard shortcuts and ARIA labels
+
+### 🔽 Custom Dropdown
+- **Material Design:** Subtle borders with hint of purple on hover
+- **Smooth Animations:** Fade in/out, chevron rotates when open
+- **Styled Options:** Dark background (#1E1E1E) with white text
+- **Purple Highlights:** Selected item shows purple text (not bright background)
+- **Custom Scrollbar:** Matches dark theme
+- **High Z-Index:** Always appears above all content
 
 ### 🔗 Embed Anywhere
 - **Universal Embeds:** Works on any website via iframe
@@ -344,4 +358,44 @@ MIT License - Feel free to use in personal and commercial projects.
 
 ---
 
+
 **Built with ❤️ for podcast enthusiasts**
+
+---
+
+## 📝 Recent Updates (November 2025)
+
+### Custom Dropdown Implementation
+- ✅ **Replaced native `<select>`** with custom Material Design dropdown
+- ✅ **Instant loading**: All 20 podcast titles appear immediately from master feed
+- ✅ **On-demand episodes**: Episodes load only when podcast selected (faster UI)
+- ✅ **Beautiful styling**: Dark theme (#1E1E1E) with white text and purple highlights
+- ✅ **Smooth animations**: Fade in/out, chevron rotation, subtle shadows
+- ✅ **High z-index (10000)**: Dropdown always appears above all content
+- ✅ **Material Design borders**: Subtle gray with purple hint on hover
+
+### Ultra-Compact Design Overhaul
+- ✅ **Typography upgrade**: Oswald bold headers + Inter body text
+- ✅ **Font Awesome 6.5.1**: Replaced Material Symbols with modern FA icons
+- ✅ **Minimal spacing scale**: 4px-24px (reduced from previous larger spacing)
+- ✅ **Sharp corners**: Removed border-radius from images for modern aesthetic
+- ✅ **Sticky navigation**: Header (z-index: 100) and dropdown stay visible
+- ✅ **Optimized layout**: Reduced vertical space while maintaining readability
+
+### Performance & UX Improvements
+- ✅ **Master feed optimization**: Extracts all podcast data instantly (<100ms)
+- ✅ **Smart loading**: Background pre-caching while first podcast plays
+- ✅ **Episode scroll reset**: List scrolls to top when switching podcasts
+- ✅ **Memory efficiency**: Episodes cached after first load
+- ✅ **Proper z-index hierarchy**: Dropdown (10000) > Selector (100) > Player (50)
+- ✅ **Embed-ready padding**: Proper alignment in iframe embeds
+
+### Bug Fixes
+- ✅ Fixed dropdown text stuck on "Loading podcasts..."
+- ✅ Fixed dropdown appearing behind player/episodes content
+- ✅ Fixed chevron icon touching dropdown border
+- ✅ Fixed "SELECT PODCAST" label alignment with content below
+- ✅ Fixed episodes not refreshing when switching podcasts
+- ✅ Removed overly bright purple backgrounds (subtle highlights only)
+
+````

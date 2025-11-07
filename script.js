@@ -14,6 +14,8 @@ const state = {
 // ==========================================
 const elements = {
     podcastSelect: document.getElementById('podcast-select'),
+    dropdownSelected: document.getElementById('dropdown-selected'),
+    dropdownOptions: document.getElementById('dropdown-options'),
     coverArt: document.getElementById('cover-art'),
     episodeTitle: document.getElementById('episode-title'),
     podcastTitle: document.getElementById('podcast-title'),
@@ -218,13 +220,26 @@ async function parseMasterFeed(xmlDoc) {
 }
 
 function populatePodcastDropdown(podcasts) {
-    // Clear existing options except first placeholder
+    // Clear custom dropdown options
+    elements.dropdownOptions.innerHTML = '';
+
+    // Clear hidden select options
     while (elements.podcastSelect.options.length > 1) {
         elements.podcastSelect.remove(1);
     }
 
-    // Add all podcasts to dropdown
-    podcasts.forEach(podcast => {
+    // Add all podcasts to both dropdowns
+    podcasts.forEach((podcast, index) => {
+        // Custom dropdown option
+        const div = document.createElement('div');
+        div.className = 'dropdown-option';
+        if (index === 0) div.classList.add('selected');
+        div.textContent = podcast.title;
+        div.dataset.index = index;
+        div.dataset.feedUrl = podcast.url;
+        elements.dropdownOptions.appendChild(div);
+
+        // Hidden select option (for compatibility)
         const option = document.createElement('option');
         option.value = podcast.id;
         option.textContent = podcast.title;
@@ -232,7 +247,15 @@ function populatePodcastDropdown(podcasts) {
         elements.podcastSelect.appendChild(option);
     });
 
+    // Set first podcast as selected in the dropdown display
+    if (podcasts.length > 0) {
+        elements.dropdownSelected.querySelector('.selected-text').textContent = podcasts[0].title;
+    }
+
     console.log(`📋 Added ${podcasts.length} podcasts to dropdown`);
+
+    // Initialize custom dropdown listeners
+    initCustomDropdown();
 }
 
 async function loadSinglePodcast(feedInfo) {
@@ -449,9 +472,14 @@ async function selectPodcast(index) {
     updatePodcastMetadata();
     renderEpisodesList();
 
-    // Load first episode
+    // Load first episode and scroll to top of episodes list
     if (state.currentPodcast.episodes.length > 0) {
         loadEpisode(state.currentPodcast.episodes[0]);
+
+        // Scroll episodes list to top
+        if (elements.episodesList) {
+            elements.episodesList.scrollTop = 0;
+        }
     }
 }
 
@@ -834,6 +862,48 @@ function handleKeyboardShortcuts(event) {
     if (event.code === 'KeyM') {
         toggleMute();
     }
+}
+
+// ==========================================
+// CUSTOM DROPDOWN
+// ==========================================
+function initCustomDropdown() {
+    // Toggle dropdown
+    elements.dropdownSelected.addEventListener('click', (e) => {
+        e.stopPropagation();
+        elements.dropdownOptions.classList.toggle('open');
+        elements.dropdownSelected.classList.toggle('active');
+    });
+
+    // Select option
+    elements.dropdownOptions.addEventListener('click', (e) => {
+        if (e.target.classList.contains('dropdown-option')) {
+            const index = parseInt(e.target.dataset.index);
+            const text = e.target.textContent;
+
+            // Update selected text
+            elements.dropdownSelected.querySelector('.selected-text').textContent = text;
+
+            // Update selected state
+            document.querySelectorAll('.dropdown-option').forEach(opt => opt.classList.remove('selected'));
+            e.target.classList.add('selected');
+
+            // Close dropdown
+            elements.dropdownOptions.classList.remove('open');
+            elements.dropdownSelected.classList.remove('active');
+
+            // Trigger podcast selection
+            selectPodcast(index);
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!elements.dropdownSelected.contains(e.target) && !elements.dropdownOptions.contains(e.target)) {
+            elements.dropdownOptions.classList.remove('open');
+            elements.dropdownSelected.classList.remove('active');
+        }
+    });
 }
 
 // ==========================================
