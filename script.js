@@ -38,6 +38,11 @@ const state = {
     currentSpeed: 1
 };
 
+// Modal state
+const modalState = {
+    isOpen: false
+};
+
 // ==========================================
 // DOM ELEMENTS
 // ==========================================
@@ -46,9 +51,7 @@ const elements = {
     dropdownSelected: document.getElementById('dropdown-selected'),
     dropdownOptions: document.getElementById('dropdown-options'),
     coverArt: document.getElementById('cover-art'),
-    episodeTitle: document.getElementById('episode-title'),
     podcastTitle: document.getElementById('podcast-title'),
-    episodeDate: document.getElementById('episode-date'),
     episodeCount: document.getElementById('episode-count'),
     audioElement: document.getElementById('audio-element'),
     playPauseBtn: document.getElementById('play-pause'),
@@ -73,6 +76,28 @@ const elements = {
     loadingOverlay: document.getElementById('loading-overlay'),
     errorToast: document.getElementById('error-toast'),
     errorMessage: document.getElementById('error-message')
+};
+
+// Modal elements
+const modalElements = {
+    modal: document.getElementById('player-modal'),
+    closeBtn: document.getElementById('player-close-btn'),
+    title: document.getElementById('player-title'),
+    podcast: document.getElementById('player-podcast'),
+    progressBar: document.querySelector('.player-progress-container .progress-bar'),
+    progressFilled: document.querySelector('.player-progress-container .progress-filled'),
+    progressBuffered: document.querySelector('.player-progress-container .progress-buffered'),
+    progressSlider: document.querySelector('.player-progress-container .progress-slider'),
+    currentTime: document.getElementById('player-current-time'),
+    durationTime: document.getElementById('player-duration-time'),
+    playBtn: document.getElementById('player-play-btn'),
+    skipBackBtn: document.getElementById('player-skip-back-btn'),
+    skipForwardBtn: document.getElementById('player-skip-forward-btn'),
+    speedBtn: document.getElementById('player-speed-btn'),
+    speedMenu: document.getElementById('player-speed-menu'),
+    volumeBtn: document.getElementById('player-volume-btn'),
+    volumeSlider: document.getElementById('player-volume-slider'),
+    downloadBtn: document.getElementById('player-download-btn')
 };
 
 // ==========================================
@@ -483,6 +508,76 @@ function parseEpisode(item, episodeIndex) {
 }
 
 // ==========================================
+// MODAL PLAYER FUNCTIONS
+// ==========================================
+function openModal(autoPlay = false) {
+    modalState.isOpen = true;
+
+    // Show modal
+    modalElements.modal.classList.add('active');
+
+    // Auto-play if requested
+    if (autoPlay && elements.audioElement.src) {
+        setTimeout(() => {
+            elements.audioElement.play();
+        }, 300); // Wait for modal animation
+    }
+}
+
+function closeModal() {
+    // Pause audio
+    elements.audioElement.pause();
+
+    // Hide modal
+    modalElements.modal.classList.remove('active');
+
+    modalState.isOpen = false;
+
+    // Reset episode play buttons
+    updateEpisodePlayButtons(null);
+}
+
+function updateModalMetadata(episode) {
+    if (!episode || !state.currentPodcast) return;
+
+    const episodeTitle = episode.title || 'Untitled Episode';
+    const podcastName = state.currentPodcast.title || 'Unknown Podcast';
+
+    // Update player bar
+    modalElements.title.textContent = episodeTitle;
+    modalElements.podcast.textContent = podcastName;
+}
+
+function updateEpisodePlayButtons(activeEpisodeId) {
+    // Reset all episodes
+    document.querySelectorAll('.episode-item').forEach(item => {
+        item.classList.remove('playing');
+    });
+
+    // Mark active episode
+    if (activeEpisodeId !== null) {
+        const activeItem = document.querySelector(`[data-episode-id="${activeEpisodeId}"]`);
+        if (activeItem) {
+            activeItem.classList.add('playing');
+        }
+    }
+}
+
+function playEpisodeInModal(episode) {
+    // Load episode into audio player
+    loadEpisode(episode);
+
+    // Update modal metadata
+    updateModalMetadata(episode);
+
+    // Show modal
+    openModal(true); // true = auto-start playback
+
+    // Update episode list UI
+    updateEpisodePlayButtons(episode.id);
+}
+
+// ==========================================
 // PODCAST DROPDOWN
 // ==========================================
 async function selectPodcast(index) {
@@ -512,21 +607,16 @@ async function selectPodcast(index) {
     updatePodcastMetadata();
     renderEpisodesList();
 
-    // Load first episode and scroll to top of episodes list
-    if (state.currentPodcast.episodes.length > 0) {
-        loadEpisode(state.currentPodcast.episodes[0]);
-
-        // Scroll episodes list to top
-        if (elements.episodesList) {
-            elements.episodesList.scrollTop = 0;
-        }
+    // Scroll episodes list to top
+    if (elements.episodesList) {
+        elements.episodesList.scrollTop = 0;
     }
 }
 
 function updatePodcastMetadata() {
     if (!state.currentPodcast) return;
 
-    // Update cover art
+    // Update cover art in podcast info section
     if (state.currentPodcast.image) {
         elements.coverArt.src = state.currentPodcast.image;
         elements.coverArt.classList.add('loaded');
@@ -537,7 +627,8 @@ function updatePodcastMetadata() {
         elements.coverArt.classList.remove('loaded');
     }
 
-    // Update episode count
+    // Update podcast title and episode count
+    elements.podcastTitle.textContent = state.currentPodcast.title;
     const episodeCount = state.currentPodcast.episodes.length;
     elements.episodeCount.textContent = `${episodeCount} episode${episodeCount !== 1 ? 's' : ''}`;
 }
@@ -581,6 +672,10 @@ function createEpisodeElement(episode) {
     const episodeImage = episode.image || state.currentPodcast.image || '';
 
     div.innerHTML = `
+        <button class="episode-play-btn" aria-label="Play episode">
+            <i class="fa-solid fa-circle-play"></i>
+            <i class="fa-solid fa-circle-pause" style="display: none;"></i>
+        </button>
         ${episodeImage ? `<img src="${episodeImage}" alt="${episode.title}" class="episode-image" onerror="this.style.display='none'">` : ''}
         <div class="episode-content">
             <div class="episode-header">
@@ -625,9 +720,9 @@ function createEpisodeElement(episode) {
         }
     });
 
-    // Load episode on click (but not on expand button)
+    // Load episode on click (but not on expand button or play button)
     div.addEventListener('click', (e) => {
-        if (!e.target.closest('.expand-description-btn')) {
+        if (!e.target.closest('.expand-description-btn') && !e.target.closest('.episode-play-btn')) {
             loadEpisode(episode);
         }
     });
@@ -659,20 +754,6 @@ function loadEpisode(episode) {
     state.isPlaying = false;
     elements.audioElement.currentTime = 0;
 
-    // Update metadata
-    elements.episodeTitle.textContent = episode.title;
-    elements.podcastTitle.textContent = state.currentPodcast.title;
-    elements.episodeDate.textContent = episode.pubDate ? formatDate(episode.pubDate) : '';
-
-    // Update active episode in list
-    document.querySelectorAll('.episode-item').forEach(item => {
-        item.classList.remove('active');
-        if (parseInt(item.getAttribute('data-episode-id')) === episode.id) {
-            item.classList.add('active');
-            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-    });
-
     // Load audio
     elements.audioElement.src = episode.audioUrl;
     elements.audioElement.load();
@@ -690,6 +771,14 @@ function loadEpisode(episode) {
 
     // Update embed code
     updateEmbedCode();
+
+    // Update active episode in list (but don't mark as playing yet)
+    document.querySelectorAll('.episode-item').forEach(item => {
+        item.classList.remove('active');
+        if (parseInt(item.getAttribute('data-episode-id')) === episode.id) {
+            item.classList.add('active');
+        }
+    });
 }
 
 function togglePlayPause() {
@@ -704,9 +793,19 @@ function togglePlayPause() {
 
 function updatePlayPauseButton(playing) {
     state.isPlaying = playing;
-    // Font Awesome icons: fa-circle-play for play, fa-circle-pause for pause
+
+    // Update main play/pause button
     elements.playIcon.className = playing ? 'fa-solid fa-circle-pause' : 'fa-solid fa-circle-play';
     elements.playPauseBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+
+    // Update modal player button
+    if (modalElements.playBtn) {
+        const modalIcon = modalElements.playBtn.querySelector('i');
+        if (modalIcon) {
+            modalIcon.className = playing ? 'fa-solid fa-circle-pause' : 'fa-solid fa-circle-play';
+        }
+        modalElements.playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    }
 }
 
 function skipBackward() {
@@ -729,6 +828,14 @@ function updateProgress() {
         elements.progressSlider.value = percent;
         elements.currentTime.textContent = formatTime(currentTime);
         elements.durationTime.textContent = formatTime(duration);
+
+        // Update modal progress if modal is open
+        if (modalState.isOpen && modalElements.progressFilled) {
+            modalElements.progressFilled.style.width = `${percent}%`;
+            modalElements.progressSlider.value = percent;
+            modalElements.currentTime.textContent = formatTime(currentTime);
+            modalElements.durationTime.textContent = formatTime(duration);
+        }
     }
 }
 
@@ -739,6 +846,11 @@ function updateBuffered() {
         const bufferedEnd = buffered.end(buffered.length - 1);
         const percent = (bufferedEnd / duration) * 100;
         elements.progressBuffered.style.width = `${percent}%`;
+
+        // Update modal buffered progress if modal is open
+        if (modalState.isOpen && modalElements.progressBuffered) {
+            modalElements.progressBuffered.style.width = `${percent}%`;
+        }
     }
 }
 
@@ -960,6 +1072,101 @@ function initEventListeners() {
     elements.podcastSelect.addEventListener('change', (e) => {
         selectPodcast(parseInt(e.target.value));
     });
+
+    // Episode play button click (event delegation)
+    document.addEventListener('click', (e) => {
+        const playBtn = e.target.closest('.episode-play-btn');
+        if (!playBtn) return;
+
+        e.stopPropagation(); // Don't trigger episode item click
+
+        const episodeItem = playBtn.closest('.episode-item');
+        const episodeId = parseInt(episodeItem.getAttribute('data-episode-id'));
+        const episode = state.currentPodcast.episodes.find(ep => ep.id === episodeId);
+
+        if (!episode) return;
+
+        // If clicking on currently playing episode, just toggle play/pause
+        if (state.currentEpisode && state.currentEpisode.id === episodeId && modalState.isOpen) {
+            togglePlayPause();
+            return;
+        }
+
+        // Load new episode and open modal
+        playEpisodeInModal(episode);
+    });
+
+    // Modal close button
+    if (modalElements.closeBtn) {
+        modalElements.closeBtn.addEventListener('click', () => {
+            closeModal();
+        });
+    }
+
+    // Modal play/pause button
+    if (modalElements.playBtn) {
+        modalElements.playBtn.addEventListener('click', () => {
+            togglePlayPause();
+        });
+    }
+
+    // Modal skip buttons
+    if (modalElements.skipBackBtn) {
+        modalElements.skipBackBtn.addEventListener('click', () => {
+            elements.audioElement.currentTime = Math.max(0, elements.audioElement.currentTime - 15);
+        });
+    }
+
+    if (modalElements.skipForwardBtn) {
+        modalElements.skipForwardBtn.addEventListener('click', () => {
+            elements.audioElement.currentTime = Math.min(elements.audioElement.duration, elements.audioElement.currentTime + 30);
+        });
+    }
+
+    // Modal speed control
+    if (modalElements.speedBtn) {
+        modalElements.speedBtn.addEventListener('click', () => {
+            modalElements.speedMenu.classList.toggle('hidden');
+        });
+    }
+
+    // Modal speed options
+    if (modalElements.speedMenu) {
+        modalElements.speedMenu.addEventListener('click', (e) => {
+            if (e.target.classList.contains('speed-option')) {
+                const speed = parseFloat(e.target.dataset.speed);
+                setPlaybackSpeed(speed);
+                modalElements.speedMenu.classList.add('hidden');
+            }
+        });
+    }
+
+    // Modal volume controls
+    if (modalElements.volumeSlider) {
+        modalElements.volumeSlider.addEventListener('input', (e) => {
+            const volume = parseFloat(e.target.value);
+            elements.audioElement.volume = volume;
+            elements.volumeSlider.value = volume; // Keep main player in sync
+        });
+    }
+
+    // Modal progress bar
+    if (modalElements.progressSlider) {
+        modalElements.progressSlider.addEventListener('input', (e) => {
+            const percent = parseFloat(e.target.value);
+            const time = (percent / 100) * elements.audioElement.duration;
+            elements.audioElement.currentTime = time;
+        });
+    }
+
+    // Modal download button
+    if (modalElements.downloadBtn) {
+        modalElements.downloadBtn.addEventListener('click', () => {
+            if (state.currentEpisode && state.currentEpisode.audio) {
+                window.open(state.currentEpisode.audio, '_blank');
+            }
+        });
+    }
 
     // Audio events
     elements.audioElement.addEventListener('play', () => updatePlayPauseButton(true));
