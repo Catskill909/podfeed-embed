@@ -514,7 +514,9 @@ function openModal(autoPlay = false) {
     modalState.isOpen = true;
 
     // Show modal
-    modalElements.modal.classList.add('active');
+    if (modalElements.modal) {
+        modalElements.modal.classList.add('active');
+    }
 
     // Auto-play if requested
     if (autoPlay && elements.audioElement.src) {
@@ -544,8 +546,12 @@ function updateModalMetadata(episode) {
     const podcastName = state.currentPodcast.title || 'Unknown Podcast';
 
     // Update player bar
-    modalElements.title.textContent = episodeTitle;
-    modalElements.podcast.textContent = podcastName;
+    if (modalElements.title) {
+        modalElements.title.textContent = episodeTitle;
+    }
+    if (modalElements.podcast) {
+        modalElements.podcast.textContent = podcastName;
+    }
 }
 
 function updateEpisodePlayButtons(activeEpisodeId) {
@@ -665,66 +671,59 @@ function createEpisodeElement(episode) {
     }
 
     const formattedDate = episode.pubDate ? formatDate(episode.pubDate) : '';
-    const description = episode.description || 'No description available';
     const duration = episode.duration ? formatDuration(episode.duration) : '';
 
     // Use episode image or fallback to podcast image
     const episodeImage = episode.image || state.currentPodcast.image || '';
 
     div.innerHTML = `
-        <button class="episode-play-btn" aria-label="Play episode">
-            <i class="fa-solid fa-circle-play"></i>
-            <i class="fa-solid fa-circle-pause" style="display: none;"></i>
-        </button>
         ${episodeImage ? `<img src="${episodeImage}" alt="${episode.title}" class="episode-image" onerror="this.style.display='none'">` : ''}
         <div class="episode-content">
-            <div class="episode-header">
-                <h4 class="episode-item-title">${episode.title}</h4>
+            <h4 class="episode-item-title">${episode.title}</h4>
+            <div class="episode-meta">
                 <span class="episode-item-date">${formattedDate}</span>
+                ${duration ? `<span>•</span><span class="episode-duration">${duration}</span>` : ''}
             </div>
-            <div class="episode-description-wrapper">
-                <p class="episode-description" data-full-text="${description.replace(/"/g, '&quot;')}">${description}</p>
-                <button class="expand-description-btn" aria-label="Expand description">
-                    <i class="fa-solid fa-chevron-down"></i>
-                </button>
-            </div>
-            ${duration ? `<div class="episode-duration">${duration}</div>` : ''}
+        </div>
+        <div class="episode-actions">
+            <button class="episode-download-btn" aria-label="Download episode" title="Download">
+                <i class="fa-solid fa-download"></i>
+            </button>
+            <button class="episode-play-btn" aria-label="Play episode" title="Play">
+                <i class="fa-solid fa-play"></i>
+                <i class="fa-solid fa-pause" style="display: none;"></i>
+            </button>
         </div>
     `;
 
-    // Check if description is truncated and show expand button
-    const descriptionEl = div.querySelector('.episode-description');
-    const expandBtn = div.querySelector('.expand-description-btn');
-
-    // Wait for next frame to check if text is truncated
-    setTimeout(() => {
-        if (descriptionEl.scrollHeight > descriptionEl.clientHeight) {
-            expandBtn.classList.add('visible');
-        } else {
-            expandBtn.classList.remove('visible');
-        }
-    }, 0);
-
-    // Handle expand/collapse
-    expandBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Don't trigger episode load
-        descriptionEl.classList.toggle('expanded');
-        expandBtn.classList.toggle('expanded');
-        const icon = expandBtn.querySelector('i');
-        if (descriptionEl.classList.contains('expanded')) {
-            icon.className = 'fa-solid fa-chevron-up';
-            expandBtn.setAttribute('aria-label', 'Collapse description');
-        } else {
-            icon.className = 'fa-solid fa-chevron-down';
-            expandBtn.setAttribute('aria-label', 'Expand description');
+    // Handle download button
+    const downloadBtn = div.querySelector('.episode-download-btn');
+    downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (episode.audioUrl) {
+            const a = document.createElement('a');
+            a.href = episode.audioUrl;
+            a.download = `${episode.title}.mp3`;
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     });
 
-    // Load episode on click (but not on expand button or play button)
-    div.addEventListener('click', (e) => {
-        if (!e.target.closest('.expand-description-btn') && !e.target.closest('.episode-play-btn')) {
-            loadEpisode(episode);
+    // Handle play button
+    const playBtn = div.querySelector('.episode-play-btn');
+    playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        // If clicking on currently loaded episode, just toggle play/pause
+        if (state.currentEpisode && state.currentEpisode.id === episode.id) {
+            togglePlayPause();
+            return;
         }
+
+        // Load new episode and open modal
+        playEpisodeInModal(episode);
     });
 
     return div;
@@ -805,6 +804,22 @@ function updatePlayPauseButton(playing) {
             modalIcon.className = playing ? 'fa-solid fa-circle-pause' : 'fa-solid fa-circle-play';
         }
         modalElements.playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    }
+
+    // Update episode card play/pause icons
+    if (state.currentEpisode) {
+        // Remove 'playing' class from all episode cards
+        document.querySelectorAll('.episode-item').forEach(item => {
+            item.classList.remove('playing');
+        });
+
+        // Add 'playing' class to current episode if playing
+        if (playing) {
+            const currentEpisodeCard = document.querySelector(`[data-episode-id="${state.currentEpisode.id}"]`);
+            if (currentEpisodeCard) {
+                currentEpisodeCard.classList.add('playing');
+            }
+        }
     }
 }
 
@@ -1212,11 +1227,15 @@ function initEventListeners() {
         }
     });
 
-    // Download
-    elements.downloadBtn.addEventListener('click', downloadEpisode);
+    // Download (optional - may not exist)
+    if (elements.downloadBtn) {
+        elements.downloadBtn.addEventListener('click', downloadEpisode);
+    }
 
-    // Embed code
-    elements.copyEmbedBtn.addEventListener('click', copyEmbedCode);
+    // Embed code (optional - may not exist)
+    if (elements.copyEmbedBtn) {
+        elements.copyEmbedBtn.addEventListener('click', copyEmbedCode);
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
