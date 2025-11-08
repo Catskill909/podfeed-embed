@@ -804,7 +804,7 @@ function updatePlayPauseButton(playing) {
     if (modalPlayBtn) {
         const playIcon = modalPlayBtn.querySelector('.fa-play');
         const pauseIcon = modalPlayBtn.querySelector('.fa-pause');
-        
+
         if (playIcon && pauseIcon) {
             if (playing) {
                 playIcon.style.display = 'none';
