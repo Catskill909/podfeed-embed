@@ -55,7 +55,6 @@ const elements = {
     episodeCount: document.getElementById('episode-count'),
     audioElement: document.getElementById('audio-element'),
     playPauseBtn: document.getElementById('play-pause'),
-    playIcon: document.getElementById('play-icon'),
     skipBackwardBtn: document.getElementById('skip-backward'),
     skipForwardBtn: document.getElementById('skip-forward'),
     progressSlider: document.getElementById('progress-slider'),
@@ -679,7 +678,14 @@ function createEpisodeElement(episode) {
     div.innerHTML = `
         ${episodeImage ? `<img src="${episodeImage}" alt="${episode.title}" class="episode-image" onerror="this.style.display='none'">` : ''}
         <div class="episode-content">
-            <h4 class="episode-item-title">${episode.title}</h4>
+            <div class="episode-title-row">
+                <h4 class="episode-item-title">${episode.title}</h4>
+                <div class="episode-playing-icon" aria-label="Playing">
+                    <span class="audio-bar"></span>
+                    <span class="audio-bar"></span>
+                    <span class="audio-bar"></span>
+                </div>
+            </div>
             <div class="episode-meta">
                 <span class="episode-item-date">${formattedDate}</span>
                 ${duration ? `<span>•</span><span class="episode-duration">${duration}</span>` : ''}
@@ -793,17 +799,22 @@ function togglePlayPause() {
 function updatePlayPauseButton(playing) {
     state.isPlaying = playing;
 
-    // Update main play/pause button
-    elements.playIcon.className = playing ? 'fa-solid fa-circle-pause' : 'fa-solid fa-circle-play';
-    elements.playPauseBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
-
-    // Update modal player button
-    if (modalElements.playBtn) {
-        const modalIcon = modalElements.playBtn.querySelector('i');
-        if (modalIcon) {
-            modalIcon.className = playing ? 'fa-solid fa-circle-pause' : 'fa-solid fa-circle-play';
+    // Update modal play/pause button (uses fa-play and fa-pause icons)
+    const modalPlayBtn = document.getElementById('play-pause');
+    if (modalPlayBtn) {
+        const playIcon = modalPlayBtn.querySelector('.fa-play');
+        const pauseIcon = modalPlayBtn.querySelector('.fa-pause');
+        
+        if (playIcon && pauseIcon) {
+            if (playing) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+            }
         }
-        modalElements.playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+        modalPlayBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
     }
 
     // Update episode card play/pause icons
