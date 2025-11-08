@@ -69,9 +69,6 @@ const elements = {
     speedMenu: document.getElementById('speed-menu'),
     downloadBtn: document.getElementById('download-btn'),
     episodesList: document.getElementById('episodes-list'),
-    embedCode: document.getElementById('embed-code'),
-    copyEmbedBtn: document.getElementById('copy-embed'),
-    copyNotification: document.getElementById('copy-notification'),
     loadingOverlay: document.getElementById('loading-overlay'),
     errorToast: document.getElementById('error-toast'),
     errorMessage: document.getElementById('error-message')
@@ -229,8 +226,13 @@ async function parseMasterFeed(xmlDoc) {
     const podcasts = [];
     items.forEach((item, i) => {
         const feedUrl = item.querySelector('link')?.textContent?.trim();
-        const title = item.querySelector('title')?.textContent || `Podcast ${i + 1}`;
-        const description = item.querySelector('description')?.textContent || '';
+        let title = item.querySelector('title')?.textContent || `Podcast ${i + 1}`;
+        let description = item.querySelector('description')?.textContent || '';
+
+        // Clean title and description - strip HTML and decode entities
+        title = stripHtml(decodeHtmlEntities(title));
+        description = stripHtml(decodeHtmlEntities(description));
+
         const coverImage = item.querySelector('enclosure[type="image/jpeg"]')?.getAttribute('url') || '';
         const episodeCount = item.querySelector('episodeCount')?.textContent || '0';
         const latestDate = item.querySelector('latestEpisodeDate')?.textContent || '';
@@ -774,9 +776,6 @@ function loadEpisode(episode) {
     // Enable download button
     elements.downloadBtn.disabled = false;
 
-    // Update embed code
-    updateEmbedCode();
-
     // Update active episode in list (but don't mark as playing yet)
     document.querySelectorAll('.episode-item').forEach(item => {
         item.classList.remove('active');
@@ -960,37 +959,6 @@ function downloadEpisode() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-}
-
-// ==========================================
-// EMBED CODE
-// ==========================================
-function updateEmbedCode() {
-    const currentUrl = window.location.href.split('?')[0];
-    const podcastId = state.currentPodcast.id;
-    const episodeId = state.currentEpisode ? state.currentEpisode.id : 0;
-    const embedUrl = `${currentUrl}?podcast=${podcastId}&episode=${episodeId}`;
-
-    const embedCodeText = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" allowfullscreen></iframe>`;
-    elements.embedCode.querySelector('code').textContent = embedCodeText;
-}
-
-async function copyEmbedCode() {
-    const codeText = elements.embedCode.textContent;
-
-    try {
-        await navigator.clipboard.writeText(codeText);
-        elements.copyNotification.classList.remove('hidden');
-        elements.copyEmbedBtn.querySelector('.copy-text').textContent = 'Copied!';
-
-        setTimeout(() => {
-            elements.copyNotification.classList.add('hidden');
-            elements.copyEmbedBtn.querySelector('.copy-text').textContent = 'Copy';
-        }, 3000);
-    } catch (error) {
-        console.error('Failed to copy:', error);
-        showError('Failed to copy to clipboard');
-    }
 }
 
 // ==========================================
@@ -1241,11 +1209,6 @@ function initEventListeners() {
     // Download (optional - may not exist)
     if (elements.downloadBtn) {
         elements.downloadBtn.addEventListener('click', downloadEpisode);
-    }
-
-    // Embed code (optional - may not exist)
-    if (elements.copyEmbedBtn) {
-        elements.copyEmbedBtn.addEventListener('click', copyEmbedCode);
     }
 
     // Keyboard shortcuts
