@@ -29,19 +29,20 @@
             <!-- Controls Panel -->
             <aside class="controls-panel">
                 <div class="panel-content">
-                    
+
                     <!-- Dimensions Section -->
                     <section class="control-section">
                         <h2 class="section-title">
                             <span class="material-icons">aspect_ratio</span>
                             Iframe Dimensions
                         </h2>
-                        
+
                         <div class="control-group">
                             <div class="input-field">
                                 <label class="input-label">Width</label>
                                 <div class="input-with-select">
-                                    <input type="number" id="iframe-width-value" value="100" min="200" max="1200" class="number-input">
+                                    <input type="number" id="iframe-width-value" value="100" min="200" max="1200"
+                                        class="number-input">
                                     <div class="select-wrapper">
                                         <select id="iframe-width-unit" class="modern-select">
                                             <option value="%">%</option>
@@ -55,7 +56,8 @@
                             <div class="input-field">
                                 <label class="input-label">Height</label>
                                 <div class="input-with-select">
-                                    <input type="number" id="iframe-height-value" value="600" min="400" max="1000" class="number-input">
+                                    <input type="number" id="iframe-height-value" value="600" min="400" max="1000"
+                                        class="number-input">
                                     <div class="select-wrapper">
                                         <select id="iframe-height-unit" class="modern-select">
                                             <option value="px">px</option>
@@ -212,11 +214,7 @@
 
                 <div class="preview-container">
                     <div class="iframe-container" id="iframe-container">
-                        <iframe 
-                            id="preview-iframe" 
-                            src="index.html" 
-                            frameborder="0" 
-                            allowfullscreen>
+                        <iframe id="preview-iframe" src="index.html" frameborder="0" allowfullscreen>
                         </iframe>
                     </div>
                 </div>
@@ -228,7 +226,8 @@
                         Embed Code
                     </h3>
                     <div class="code-wrapper">
-                        <pre id="embed-code-display" class="code-block"><code>&lt;iframe src="index.html" width="100%" height="600px" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code></pre>
+                        <pre id="embed-code-display"
+                            class="code-block"><code>&lt;iframe src="index.html" width="100%" height="600px" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code></pre>
                         <button id="copy-code-btn" class="copy-btn" title="Copy to clipboard">
                             <span class="material-icons">content_copy</span>
                         </button>

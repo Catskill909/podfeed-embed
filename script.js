@@ -216,13 +216,13 @@ async function fetchWithFallback(url) {
             }
 
             const data = proxy.parseJson ? await response.json() : await response.text();
-            
+
             // Check if we got PHP source code instead of executed result
             if (typeof data === 'string' && data.trim().startsWith('<?php')) {
                 console.warn(`${proxy.name} returned PHP source code, skipping...`);
                 continue;
             }
-            
+
             const contents = proxy.getContents(data);
             console.log(`✓ Successfully fetched via ${proxy.name}`);
             return contents;
@@ -458,7 +458,7 @@ async function fetchRSSFeed() {
         // Dropdown already populated in parseMasterFeed()
         selectPodcast(0); // Load first podcast by default
         showLoading(false);
-        
+
         // Process URL parameters after podcasts are loaded
         loadFromUrlParams();
     } catch (error) {
@@ -676,7 +676,7 @@ function renderEpisodesList() {
     }
 
     let episodes = [...state.currentPodcast.episodes];
-    
+
     // Apply sorting if specified
     if (state.episodeSorting) {
         console.log('Applying episode sorting:', state.episodeSorting);
@@ -690,7 +690,7 @@ function renderEpisodesList() {
             // 'newest' is default, no change needed
         }
     }
-    
+
     // Apply episode limit if specified
     if (state.episodeLimit) {
         console.log('Applying episode limit:', state.episodeLimit);
@@ -703,7 +703,7 @@ function renderEpisodesList() {
         const episodeElement = createEpisodeElement(episode);
         elements.episodesList.appendChild(episodeElement);
     });
-    
+
     // Apply download button visibility after episodes are rendered
     if (!state.uiVisibility.download) {
         applyDownloadVisibility(false);
@@ -1026,30 +1026,30 @@ function applyThemeFromParam(theme) {
 
 function applyUIVisibility(options) {
     console.log('Applying UI visibility:', options);
-    
+
     // Store in state
     state.uiVisibility = { ...state.uiVisibility, ...options };
-    
+
     if (!options.header) {
         const header = document.querySelector('.app-header');
         if (header) header.style.display = 'none';
     }
-    
+
     if (!options.selector) {
         const selector = document.querySelector('.podcast-selector-section');
         if (selector) selector.style.display = 'none';
     }
-    
+
     if (!options.cover) {
         const cover = document.querySelector('.cover-art-container');
         if (cover) cover.style.display = 'none';
     }
-    
+
     if (!options.themeToggle) {
         const themeToggle = document.querySelector('#theme-toggle');
         if (themeToggle) themeToggle.style.display = 'none';
     }
-    
+
     // Download buttons - apply when episodes are rendered
     if (!options.download) {
         applyDownloadVisibility(false);
@@ -1084,20 +1084,20 @@ function handleAutoPlay(episodes) {
 function loadFromUrlParams() {
     const params = new URLSearchParams(window.location.search);
     console.log('Loading URL parameters:', params.toString());
-    
+
     // Theme support
     const theme = params.get('theme');
     if (theme && ['dark', 'light', 'auto'].includes(theme)) {
         applyThemeFromParam(theme);
     }
-    
+
     // UI component visibility
     const hideHeader = params.get('header') === 'false';
     const hideSelector = params.get('selector') === 'false';
     const hideCover = params.get('cover') === 'false';
     const hideDownload = params.get('download') === 'false';
     const hideThemeToggle = params.get('theme_toggle') === 'false';
-    
+
     applyUIVisibility({
         header: !hideHeader,
         selector: !hideSelector,
@@ -1105,22 +1105,22 @@ function loadFromUrlParams() {
         download: !hideDownload,
         themeToggle: !hideThemeToggle
     });
-    
+
     // Episode sorting
     const sort = params.get('sort');
     if (sort && ['newest', 'oldest', 'alphabetical'].includes(sort)) {
         applyEpisodeSorting(sort);
     }
-    
+
     // Episode limit
     const limit = params.get('limit');
     if (limit && !isNaN(parseInt(limit))) {
         applyEpisodeLimit(parseInt(limit));
     }
-    
+
     // Existing podcast/episode selection
     const podcastId = params.get('podcast');
-    
+
     if (podcastId !== null) {
         const podcast = state.podcasts[parseInt(podcastId)];
         if (podcast) {
