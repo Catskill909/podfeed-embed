@@ -35,7 +35,17 @@ const state = {
     currentPodcast: null,
     currentEpisode: null,
     isPlaying: false,
-    currentSpeed: 1
+    currentSpeed: 1,
+    // URL parameter state
+    episodeSorting: null,
+    episodeLimit: null,
+    uiVisibility: {
+        header: true,
+        selector: true,
+        cover: true,
+        download: true,
+        themeToggle: true
+    }
 };
 
 // Modal state
@@ -151,16 +161,11 @@ function showLoading(show = true, message = 'Loading podcasts...') {
 // RSS FEED PARSING
 // ==========================================
 async function fetchWithFallback(url) {
-    // Determine base URL for local proxy
+    // Use dedicated PHP server for local proxy if available
+    const phpServerUrl = 'http://localhost:8080';
     const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
 
     const proxies = [
-        {
-            name: 'Local Proxy',
-            url: `${baseUrl}proxy.php?url=${encodeURIComponent(url)}`,
-            parseJson: false,
-            getContents: (data) => data
-        },
         {
             name: 'CorsProxy.io',
             url: `https://corsproxy.io/?${encodeURIComponent(url)}`,
@@ -187,6 +192,12 @@ async function fetchWithFallback(url) {
             }
         },
         {
+            name: 'Local PHP Proxy',
+            url: `${phpServerUrl}/proxy.php?url=${encodeURIComponent(url)}`,
+            parseJson: false,
+            getContents: (data) => data
+        },
+        {
             name: 'CodeTabs',
             url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
             parseJson: false,
@@ -205,6 +216,13 @@ async function fetchWithFallback(url) {
             }
 
             const data = proxy.parseJson ? await response.json() : await response.text();
+            
+            // Check if we got PHP source code instead of executed result
+            if (typeof data === 'string' && data.trim().startsWith('<?php')) {
+                console.warn(`${proxy.name} returned PHP source code, skipping...`);
+                continue;
+            }
+            
             const contents = proxy.getContents(data);
             console.log(`✓ Successfully fetched via ${proxy.name}`);
             return contents;
@@ -440,6 +458,9 @@ async function fetchRSSFeed() {
         // Dropdown already populated in parseMasterFeed()
         selectPodcast(0); // Load first podcast by default
         showLoading(false);
+        
+        // Process URL parameters after podcasts are loaded
+        loadFromUrlParams();
     } catch (error) {
         console.error('❌ Error fetching RSS feed:', error);
 
@@ -654,12 +675,39 @@ function renderEpisodesList() {
         return;
     }
 
+    let episodes = [...state.currentPodcast.episodes];
+    
+    // Apply sorting if specified
+    if (state.episodeSorting) {
+        console.log('Applying episode sorting:', state.episodeSorting);
+        switch (state.episodeSorting) {
+            case 'oldest':
+                episodes.reverse();
+                break;
+            case 'alphabetical':
+                episodes.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+            // 'newest' is default, no change needed
+        }
+    }
+    
+    // Apply episode limit if specified
+    if (state.episodeLimit) {
+        console.log('Applying episode limit:', state.episodeLimit);
+        episodes = episodes.slice(0, state.episodeLimit);
+    }
+
     elements.episodesList.innerHTML = '';
 
-    state.currentPodcast.episodes.forEach(episode => {
+    episodes.forEach(episode => {
         const episodeElement = createEpisodeElement(episode);
         elements.episodesList.appendChild(episodeElement);
     });
+    
+    // Apply download button visibility after episodes are rendered
+    if (!state.uiVisibility.download) {
+        applyDownloadVisibility(false);
+    }
 }
 
 function createEpisodeElement(episode) {
@@ -962,19 +1010,125 @@ function downloadEpisode() {
 }
 
 // ==========================================
+// URL PARAMETER HELPERS
+// ==========================================
+function applyThemeFromParam(theme) {
+    console.log('Applying theme from param:', theme);
+    if (theme === 'auto') {
+        // Use system preference
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', systemDark ? 'dark' : 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+    updateThemeToggle(theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme);
+}
+
+function applyUIVisibility(options) {
+    console.log('Applying UI visibility:', options);
+    
+    // Store in state
+    state.uiVisibility = { ...state.uiVisibility, ...options };
+    
+    if (!options.header) {
+        const header = document.querySelector('.app-header');
+        if (header) header.style.display = 'none';
+    }
+    
+    if (!options.selector) {
+        const selector = document.querySelector('.podcast-selector-section');
+        if (selector) selector.style.display = 'none';
+    }
+    
+    if (!options.cover) {
+        const cover = document.querySelector('.cover-art-container');
+        if (cover) cover.style.display = 'none';
+    }
+    
+    if (!options.themeToggle) {
+        const themeToggle = document.querySelector('#theme-toggle');
+        if (themeToggle) themeToggle.style.display = 'none';
+    }
+    
+    // Download buttons - apply when episodes are rendered
+    if (!options.download) {
+        applyDownloadVisibility(false);
+    }
+}
+
+function applyDownloadVisibility(show) {
+    const downloadButtons = document.querySelectorAll('.episode-download-btn');
+    downloadButtons.forEach(btn => {
+        btn.style.display = show ? 'block' : 'none';
+    });
+}
+
+function applyEpisodeSorting(sortType) {
+    console.log('Setting episode sorting:', sortType);
+    state.episodeSorting = sortType;
+}
+
+function applyEpisodeLimit(limit) {
+    console.log('Setting episode limit:', limit);
+    state.episodeLimit = limit;
+}
+
+function handleAutoPlay(episodes) {
+    // Auto-play functionality removed for simplicity
+    // Can be re-added later if needed
+}
+
+// ==========================================
 // URL PARAMETERS
 // ==========================================
 function loadFromUrlParams() {
     const params = new URLSearchParams(window.location.search);
+    console.log('Loading URL parameters:', params.toString());
+    
+    // Theme support
+    const theme = params.get('theme');
+    if (theme && ['dark', 'light', 'auto'].includes(theme)) {
+        applyThemeFromParam(theme);
+    }
+    
+    // UI component visibility
+    const hideHeader = params.get('header') === 'false';
+    const hideSelector = params.get('selector') === 'false';
+    const hideCover = params.get('cover') === 'false';
+    const hideDownload = params.get('download') === 'false';
+    const hideThemeToggle = params.get('theme_toggle') === 'false';
+    
+    applyUIVisibility({
+        header: !hideHeader,
+        selector: !hideSelector,
+        cover: !hideCover,
+        download: !hideDownload,
+        themeToggle: !hideThemeToggle
+    });
+    
+    // Episode sorting
+    const sort = params.get('sort');
+    if (sort && ['newest', 'oldest', 'alphabetical'].includes(sort)) {
+        applyEpisodeSorting(sort);
+    }
+    
+    // Episode limit
+    const limit = params.get('limit');
+    if (limit && !isNaN(parseInt(limit))) {
+        applyEpisodeLimit(parseInt(limit));
+    }
+    
+    // Existing podcast/episode selection
     const podcastId = params.get('podcast');
-    const episodeId = params.get('episode');
-
+    
     if (podcastId !== null) {
         const podcast = state.podcasts[parseInt(podcastId)];
         if (podcast) {
             selectPodcast(parseInt(podcastId));
 
+            const episodeId = params.get('episode');
             if (episodeId !== null) {
+                // Load specific episode if provided
                 const episode = podcast.episodes[parseInt(episodeId)];
                 if (episode) {
                     loadEpisode(episode);
@@ -1222,12 +1376,6 @@ async function init() {
     initTheme(); // Initialize theme before anything else
     initEventListeners();
     await fetchRSSFeed();
-
-    // Check URL parameters
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('podcast')) {
-        loadFromUrlParams();
-    }
 }
 
 // Start the app when DOM is ready
