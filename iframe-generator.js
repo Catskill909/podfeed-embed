@@ -13,6 +13,7 @@ class IframeGenerator {
             defaultPodcast: document.getElementById('default-podcast'),
             episodeSort: document.getElementById('episode-sort'),
             episodeLimit: document.getElementById('episode-limit'),
+            podcastDropdownOrder: document.getElementById('podcast-dropdown-order'),
 
             // Theme & UI
             defaultTheme: document.getElementById('default-theme'),
@@ -160,6 +161,7 @@ class IframeGenerator {
         this.controls.defaultPodcast.addEventListener('change', () => this.updatePreview());
         this.controls.episodeSort.addEventListener('change', () => this.updatePreview());
         this.controls.episodeLimit.addEventListener('change', () => this.updatePreview());
+        this.controls.podcastDropdownOrder.addEventListener('change', () => this.updatePreview());
 
         // Theme & UI controls
         this.controls.defaultTheme.addEventListener('change', () => this.updatePreview());
@@ -213,6 +215,11 @@ class IframeGenerator {
         // Episode limit
         if (this.controls.episodeLimit.value) {
             params.append('limit', this.controls.episodeLimit.value);
+        }
+
+        // Podcast dropdown order
+        if (this.controls.podcastDropdownOrder.value !== 'feed') {
+            params.append('podcast_order', this.controls.podcastDropdownOrder.value);
         }
 
         // Theme

@@ -39,6 +39,7 @@ const state = {
     // URL parameter state
     episodeSorting: null,
     episodeLimit: null,
+    podcastDropdownOrder: null,
     uiVisibility: {
         header: true,
         selector: true,
@@ -299,6 +300,34 @@ async function parseMasterFeed(xmlDoc) {
 }
 
 function populatePodcastDropdown(podcasts) {
+    // Apply sorting based on podcastDropdownOrder parameter
+    let sortedPodcasts = [...podcasts]; // Create a copy to avoid modifying original
+
+    if (state.podcastDropdownOrder) {
+        console.log('Applying podcast dropdown order:', state.podcastDropdownOrder);
+        switch (state.podcastDropdownOrder) {
+            case 'alphabetical':
+                sortedPodcasts.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+            case 'alphabetical-desc':
+                sortedPodcasts.sort((a, b) => b.title.localeCompare(a.title));
+                break;
+            case 'episode-count':
+                sortedPodcasts.sort((a, b) => (b.episodeCount || 0) - (a.episodeCount || 0));
+                break;
+            case 'episode-count-desc':
+                sortedPodcasts.sort((a, b) => (a.episodeCount || 0) - (b.episodeCount || 0));
+                break;
+            case 'latest-date':
+                sortedPodcasts.sort((a, b) => new Date(b.latestDate || 0) - new Date(a.latestDate || 0));
+                break;
+            case 'oldest-date':
+                sortedPodcasts.sort((a, b) => new Date(a.latestDate || 0) - new Date(b.latestDate || 0));
+                break;
+            // 'feed' - no sorting, use original order
+        }
+    }
+
     // Clear custom dropdown options
     elements.dropdownOptions.innerHTML = '';
 
@@ -307,31 +336,31 @@ function populatePodcastDropdown(podcasts) {
         elements.podcastSelect.remove(1);
     }
 
-    // Add all podcasts to both dropdowns
-    podcasts.forEach((podcast, index) => {
+    // Add all podcasts to both dropdowns using sorted order
+    sortedPodcasts.forEach((podcast, displayIndex) => {
         // Custom dropdown option
         const div = document.createElement('div');
         div.className = 'dropdown-option';
-        if (index === 0) div.classList.add('selected');
+        if (displayIndex === 0) div.classList.add('selected');
         div.textContent = podcast.title;
-        div.dataset.index = index;
+        div.dataset.index = podcast.id; // Use original ID, not display index
         div.dataset.feedUrl = podcast.url;
         elements.dropdownOptions.appendChild(div);
 
         // Hidden select option (for compatibility)
         const option = document.createElement('option');
-        option.value = podcast.id;
+        option.value = podcast.id; // Use original ID
         option.textContent = podcast.title;
         option.dataset.feedUrl = podcast.url;
         elements.podcastSelect.appendChild(option);
     });
 
     // Set first podcast as selected in the dropdown display
-    if (podcasts.length > 0) {
-        elements.dropdownSelected.querySelector('.selected-text').textContent = podcasts[0].title;
+    if (sortedPodcasts.length > 0) {
+        elements.dropdownSelected.querySelector('.selected-text').textContent = sortedPodcasts[0].title;
     }
 
-    console.log(`📋 Added ${podcasts.length} podcasts to dropdown`);
+    console.log(`📋 Added ${sortedPodcasts.length} podcasts to dropdown (order: ${state.podcastDropdownOrder || 'feed'})`);
 
     // Initialize custom dropdown listeners
     initCustomDropdown();
@@ -461,6 +490,11 @@ async function fetchRSSFeed() {
 
         // Process URL parameters after podcasts are loaded
         loadFromUrlParams();
+
+        // Re-populate dropdown after URL parameters are processed (to apply sorting)
+        if (state.podcastDropdownOrder) {
+            populatePodcastDropdown(state.podcasts);
+        }
     } catch (error) {
         console.error('❌ Error fetching RSS feed:', error);
 
@@ -1073,6 +1107,11 @@ function applyEpisodeLimit(limit) {
     state.episodeLimit = limit;
 }
 
+function applyPodcastDropdownOrder(orderType) {
+    console.log('✅ Setting podcast dropdown order:', orderType);
+    state.podcastDropdownOrder = orderType;
+}
+
 function handleAutoPlay(episodes) {
     // Auto-play functionality removed for simplicity
     // Can be re-added later if needed
@@ -1116,6 +1155,13 @@ function loadFromUrlParams() {
     const limit = params.get('limit');
     if (limit && !isNaN(parseInt(limit))) {
         applyEpisodeLimit(parseInt(limit));
+    }
+
+    // Podcast dropdown order
+    const podcastOrder = params.get('podcast_order');
+    if (podcastOrder && ['alphabetical', 'alphabetical-desc', 'episode-count', 'episode-count-desc', 'latest-date', 'oldest-date'].includes(podcastOrder)) {
+        console.log('🔧 Found podcast_order parameter:', podcastOrder);
+        applyPodcastDropdownOrder(podcastOrder);
     }
 
     // Existing podcast/episode selection
@@ -1167,7 +1213,13 @@ function handleKeyboardShortcuts(event) {
 // ==========================================
 // CUSTOM DROPDOWN
 // ==========================================
+// Custom dropdown initialization state
+let customDropdownInitialized = false;
+
 function initCustomDropdown() {
+    // Only initialize once to avoid duplicate event listeners
+    if (customDropdownInitialized) return;
+
     // Toggle dropdown
     elements.dropdownSelected.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1204,6 +1256,8 @@ function initCustomDropdown() {
             elements.dropdownSelected.classList.remove('active');
         }
     });
+
+    customDropdownInitialized = true;
 }
 
 // ==========================================
