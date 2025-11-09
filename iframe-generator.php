@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Player - Embed Generator</title>
+    <link rel="stylesheet" href="iframe-generator.css?v=<?php echo time(); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="header-title">
+                        <span class="material-icons">podcasts</span>
+                        Podcast Player Embed Generator
+                    </h1>
+                    <p class="header-subtitle">Create custom iframe embeds with real-time preview</p>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle theme">
+                    <span class="material-icons">dark_mode</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Controls Panel - 3 Columns Layout -->
+            <section class="controls-grid">
+                <!-- Column 1: Iframe Dimensions -->
+                <div class="control-column">
+                    <div class="control-section">
+                        <h2 class="section-title">
+                            <span class="material-icons">aspect_ratio</span>
+                            Iframe Dimensions
+                        </h2>
+
+                        <div class="control-group">
+                            <div class="input-field">
+                                <label class="input-label">Width</label>
+                                <div class="input-with-select">
+                                    <input type="number" id="iframe-width-value" value="100" min="200" max="1200"
+                                        class="number-input">
+                                    <div class="select-wrapper">
+                                        <select id="iframe-width-unit" class="modern-select">
+                                            <option value="%">%</option>
+                                            <option value="px">px</option>
+                                        </select>
+                                        <span class="material-icons select-arrow">expand_more</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="input-field">
+                                <label class="input-label">Height</label>
+                                <div class="input-with-select">
+                                    <input type="number" id="iframe-height-value" value="600" min="400" max="1000"
+                                        class="number-input">
+                                    <div class="select-wrapper">
+                                        <select id="iframe-height-unit" class="modern-select">
+                                            <option value="px">px</option>
+                                        </select>
+                                        <span class="material-icons select-arrow">expand_more</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Content & Behavior -->
+                <div class="control-column">
+                    <div class="control-section">
+                        <h2 class="section-title">
+                            <span class="material-icons">tune</span>
+                            Content & Behavior
+                        </h2>
+
+                        <div class="control-group">
+                            <div class="input-field">
+                                <label class="input-label">Default Podcast</label>
+                                <div class="select-wrapper">
+                                    <select id="default-podcast" class="modern-select">
+                                        <option value="">First Available</option>
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                    <span class="material-icons select-arrow">expand_more</span>
+                                </div>
+                            </div>
+
+                            <div class="input-field">
+                                <label class="input-label">Episode Order</label>
+                                <div class="select-wrapper">
+                                    <select id="episode-sort" class="modern-select">
+                                        <option value="newest">Newest First</option>
+                                        <option value="oldest">Oldest First</option>
+                                        <option value="alphabetical">Alphabetical</option>
+                                    </select>
+                                    <span class="material-icons select-arrow">expand_more</span>
+                                </div>
+                            </div>
+
+                            <div class="input-field">
+                                <label class="input-label">Max Episodes Shown</label>
+                                <div class="select-wrapper">
+                                    <select id="episode-limit" class="modern-select">
+                                        <option value="">All Episodes</option>
+                                        <option value="5">Latest 5</option>
+                                        <option value="10">Latest 10</option>
+                                        <option value="25">Latest 25</option>
+                                        <option value="50">Latest 50</option>
+                                    </select>
+                                    <span class="material-icons select-arrow">expand_more</span>
+                                </div>
+                            </div>
+
+                            <div class="input-field">
+                                <label class="input-label">Podcast Dropdown Order</label>
+                                <div class="select-wrapper">
+                                    <select id="podcast-dropdown-order" class="modern-select">
+                                        <option value="feed">Feed Order (Default)</option>
+                                        <option value="alphabetical">Alphabetical A-Z</option>
+                                        <option value="alphabetical-desc">Alphabetical Z-A</option>
+                                        <option value="episode-count">Most Episodes First</option>
+                                        <option value="episode-count-desc">Least Episodes First</option>
+                                        <option value="latest-date">Latest Content First</option>
+                                        <option value="oldest-date">Oldest Content First</option>
+                                    </select>
+                                    <span class="material-icons select-arrow">expand_more</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 3: Theme & UI -->
+                <div class="control-column">
+                    <div class="control-section">
+                        <h2 class="section-title">
+                            <span class="material-icons">palette</span>
+                            Theme & UI
+                        </h2>
+
+                        <div class="control-group">
+                            <div class="input-field">
+                                <label class="input-label">Default Theme</label>
+                                <div class="select-wrapper">
+                                    <select id="default-theme" class="modern-select">
+                                        <option value="dark">Dark</option>
+                                        <option value="light">Light</option>
+                                        <option value="auto">System Preference</option>
+                                    </select>
+                                    <span class="material-icons select-arrow">expand_more</span>
+                                </div>
+                            </div>
+
+                            <div class="switch-group">
+                                <label class="switch-field">
+                                    <span class="switch-label">Hide Theme Toggle</span>
+                                    <div class="switch">
+                                        <input type="checkbox" id="hide-theme-toggle" class="switch-input">
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+
+                                <label class="switch-field">
+                                    <span class="switch-label">Show Header</span>
+                                    <div class="switch">
+                                        <input type="checkbox" id="show-header" checked class="switch-input">
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+
+                                <label class="switch-field">
+                                    <span class="switch-label">Show Podcast Selector</span>
+                                    <div class="switch">
+                                        <input type="checkbox" id="show-podcast-selector" checked class="switch-input">
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+
+                                <label class="switch-field">
+                                    <span class="switch-label">Show Cover Art</span>
+                                    <div class="switch">
+                                        <input type="checkbox" id="show-cover-art" checked class="switch-input">
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+
+                                <label class="switch-field">
+                                    <span class="switch-label">Show Download Buttons</span>
+                                    <div class="switch">
+                                        <input type="checkbox" id="show-download-buttons" checked class="switch-input">
+                                        <span class="switch-slider"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Embed Code Display with Integrated Button -->
+            <div class="embed-code-section">
+                <h3 class="embed-title">
+                    <span class="material-icons">code</span>
+                    Embed Code
+                </h3>
+                <div class="code-wrapper">
+                    <pre id="embed-code-display"
+                        class="code-block"><code>&lt;iframe src="index.html" width="100%" height="600px" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code></pre>
+                    <button id="copy-code-btn" class="copy-btn" title="Copy to clipboard">
+                        <span class="material-icons">content_copy</span>
+                    </button>
+                </div>
+                <!-- Main Copy Button Inside Container -->
+                <div class="embed-actions">
+                    <button id="copy-embed-code" class="primary-button">
+                        <span class="material-icons">content_copy</span>
+                        Copy Embed Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Panel - Full Width -->
+            <main class="preview-panel">
+                <div class="preview-header">
+                    <h2 class="preview-title">
+                        <span class="material-icons">preview</span>
+                        Live Preview
+                    </h2>
+                    <div class="preview-devices">
+                        <button class="device-btn active" data-device="desktop">
+                            <span class="material-icons">computer</span>
+                        </button>
+                        <button class="device-btn" data-device="tablet">
+                            <span class="material-icons">tablet_mac</span>
+                        </button>
+                        <button class="device-btn" data-device="mobile">
+                            <span class="material-icons">smartphone</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="preview-container">
+                    <div class="iframe-container" id="iframe-container">
+                        <iframe id="preview-iframe" src="index.html" frameborder="0" allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast hidden">
+            <span class="material-icons">check_circle</span>
+            <span class="toast-text">Copied to clipboard!</span>
+        </div>
+    </div>
+
+    <script src="iframe-generator.js?v=<?php echo time(); ?>"></script>
+</body>
+
+</html>

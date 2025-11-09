@@ -409,7 +409,7 @@ function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
     updateThemeToggle(savedTheme);
-    
+
     // Add event listener for theme toggle
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
@@ -432,7 +432,7 @@ function toggleTheme() {
 function updateThemeToggle(theme) {
     const themeToggle = document.getElementById('theme-toggle');
     if (!themeToggle) return;
-    
+
     const icon = themeToggle.querySelector('.material-icons');
     if (theme === 'light') {
         themeToggle.setAttribute('aria-label', 'Switch to dark mode');
