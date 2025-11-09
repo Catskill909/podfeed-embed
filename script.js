@@ -1427,6 +1427,51 @@ function initEventListeners() {
 // INITIALIZATION
 // ==========================================
 async function init() {
+    // Detect if running in iframe and add class for embed-specific styling
+    if (window.self !== window.top) {
+        document.body.classList.add('embed-mode');
+        
+        // Force height management in embed mode
+        function applyIframeHeightConstraints() {
+            const appContainer = document.querySelector('.app-container');
+            const mainContent = document.querySelector('.main-content');
+            const episodesSection = document.querySelector('.episodes-section');
+            const episodesList = document.querySelector('.episodes-list');
+            
+            // Force all containers to inherit height from iframe
+            if (appContainer) {
+                appContainer.style.height = '100%';
+                appContainer.style.maxHeight = 'none';
+                appContainer.style.minHeight = 'auto';
+            }
+            if (mainContent) {
+                mainContent.style.height = '100%';
+                mainContent.style.flex = '1';
+                mainContent.style.display = 'flex';
+                mainContent.style.flexDirection = 'column';
+            }
+            if (episodesSection) {
+                episodesSection.style.flex = '1';
+                episodesSection.style.display = 'flex';
+                episodesSection.style.flexDirection = 'column';
+                episodesSection.style.height = '100%';
+            }
+            if (episodesList) {
+                episodesList.style.maxHeight = 'none';
+                episodesList.style.flex = '1';
+                episodesList.style.overflowY = 'auto';
+            }
+            
+            console.log('Applied iframe height constraints');
+        }
+        
+        // Apply constraints after DOM is ready
+        setTimeout(applyIframeHeightConstraints, 100);
+        // Also reapply if DOM changes
+        const observer = new MutationObserver(applyIframeHeightConstraints);
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+    
     initTheme(); // Initialize theme before anything else
     initEventListeners();
     await fetchRSSFeed();

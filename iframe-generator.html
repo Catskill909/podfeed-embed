@@ -26,12 +26,11 @@
         </header>
 
         <div class="main-layout">
-            <!-- Controls Panel -->
-            <aside class="controls-panel">
-                <div class="panel-content">
-
-                    <!-- Dimensions Section -->
-                    <section class="control-section">
+            <!-- Controls Panel - 3 Columns Layout -->
+            <section class="controls-grid">
+                <!-- Column 1: Iframe Dimensions -->
+                <div class="control-column">
+                    <div class="control-section">
                         <h2 class="section-title">
                             <span class="material-icons">aspect_ratio</span>
                             Iframe Dimensions
@@ -61,17 +60,18 @@
                                     <div class="select-wrapper">
                                         <select id="iframe-height-unit" class="modern-select">
                                             <option value="px">px</option>
-                                            <option value="vh">vh</option>
                                         </select>
                                         <span class="material-icons select-arrow">expand_more</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </div>
+                </div>
 
-                    <!-- Content Controls Section -->
-                    <section class="control-section">
+                <!-- Column 2: Content & Behavior -->
+                <div class="control-column">
+                    <div class="control-section">
                         <h2 class="section-title">
                             <span class="material-icons">tune</span>
                             Content & Behavior
@@ -131,10 +131,12 @@
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </div>
+                </div>
 
-                    <!-- Theme & UI Section -->
-                    <section class="control-section">
+                <!-- Column 3: Theme & UI -->
+                <div class="control-column">
+                    <div class="control-section">
                         <h2 class="section-title">
                             <span class="material-icons">palette</span>
                             Theme & UI
@@ -195,20 +197,19 @@
                                 </label>
                             </div>
                         </div>
-                    </section>
-
-                    <!-- Generate Button -->
-                    <div class="action-buttons">
-                        <button id="copy-embed-code" class="primary-button">
-                            <span class="material-icons">content_copy</span>
-                            Copy Embed Code
-                        </button>
                     </div>
-
                 </div>
-            </aside>
+            </section>
 
-            <!-- Preview Panel -->
+            <!-- Generate Button -->
+            <div class="action-buttons">
+                <button id="copy-embed-code" class="primary-button">
+                    <span class="material-icons">content_copy</span>
+                    Copy Embed Code
+                </button>
+            </div>
+
+            <!-- Preview Panel - Full Width -->
             <main class="preview-panel">
                 <div class="preview-header">
                     <h2 class="preview-title">

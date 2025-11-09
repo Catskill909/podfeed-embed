@@ -276,6 +276,12 @@ class IframeGenerator {
         // Apply dimensions to iframe itself for accurate preview
         iframe.style.width = width;
         iframe.style.height = height;
+        
+        // DEBUG: Log what we're applying
+        console.log('🔧 APPLYING IFRAME DIMENSIONS:');
+        console.log('Width:', width, '→ iframe.style.width =', iframe.style.width);
+        console.log('Height:', height, '→ iframe.style.height =', iframe.style.height);
+        console.log('Computed iframe size:', iframe.getBoundingClientRect());
 
         // Update embed code display (without cache buster)
         this.updateEmbedCode(embedUrl, width, height);
