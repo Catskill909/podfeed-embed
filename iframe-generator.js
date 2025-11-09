@@ -277,21 +277,10 @@ class IframeGenerator {
         iframe.style.width = width;
         iframe.style.height = height;
 
-        // CRITICAL FIX: Also apply dimensions to the container
-        const container = this.controls.iframeContainer;
-        if (this.controls.widthUnit.value === 'px') {
-            container.style.width = width;
-        } else {
-            container.style.width = width;
-        }
-        container.style.height = height;
-
         // DEBUG: Log what we're applying
         console.log('🔧 APPLYING IFRAME DIMENSIONS:');
         console.log('Width:', width, '→ iframe.style.width =', iframe.style.width);
         console.log('Height:', height, '→ iframe.style.height =', iframe.style.height);
-        console.log('Container width:', container.style.width);
-        console.log('Container height:', container.style.height);
         console.log('Computed iframe size:', iframe.getBoundingClientRect());
 
         // Update embed code display (without cache buster)
