@@ -4,7 +4,17 @@
 const THEME_KEY = 'podcast-player-theme';
 
 function initTheme() {
-    // Get saved theme or default to dark
+    // Check for URL theme parameter first
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTheme = urlParams.get('theme');
+    
+    if (urlTheme && ['light', 'dark', 'auto'].includes(urlTheme)) {
+        // URL parameter overrides everything
+        applyThemeFromParam(urlTheme);
+        return;
+    }
+    
+    // Otherwise use saved theme or default to dark
     const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggle(savedTheme);
@@ -13,9 +23,18 @@ function initTheme() {
 function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme') || 'dark';
     const next = current === 'dark' ? 'light' : 'dark';
+    
+    // Set the new theme
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem(THEME_KEY, next);
     updateThemeToggle(next);
+    
+    // If we're in an iframe (embed mode), also update the URL to reflect the change
+    if (window.self !== window.top) {
+        const url = new URL(window.location);
+        url.searchParams.set('theme', next);
+        window.history.replaceState({}, '', url);
+    }
 }
 
 function updateThemeToggle(theme) {

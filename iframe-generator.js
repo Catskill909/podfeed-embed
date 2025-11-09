@@ -399,4 +399,48 @@ document.addEventListener('DOMContentLoaded', () => {
         previewPanel.style.opacity = '1';
         previewPanel.style.transform = 'translateX(0)';
     }, 200);
+
+    // Initialize theme toggle
+    initTheme();
 });
+
+// Theme Management Functions
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    updateThemeToggle(savedTheme);
+    
+    // Add event listener for theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    updateThemeToggle(newTheme);
+}
+
+function updateThemeToggle(theme) {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (!themeToggle) return;
+    
+    const icon = themeToggle.querySelector('.material-icons');
+    if (theme === 'light') {
+        themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+        themeToggle.setAttribute('title', 'Switch to dark mode');
+        icon.textContent = 'light_mode';
+    } else {
+        themeToggle.setAttribute('aria-label', 'Switch to light mode');
+        themeToggle.setAttribute('title', 'Switch to light mode');
+        icon.textContent = 'dark_mode';
+    }
+}
