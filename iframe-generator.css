@@ -399,8 +399,9 @@ body {
     gap: var(--spacing-sm);
     transition: all var(--transition-fast);
     box-shadow: var(--elevation-2);
-    width: 100%;
+    width: fit-content;
     justify-content: center;
+    min-width: 200px;
 }
 
 .primary-button:hover {
@@ -522,6 +523,7 @@ body {
     border: 1px solid var(--md-outline-variant);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
 }
 
 .embed-title {
@@ -537,6 +539,14 @@ body {
 .embed-title .material-icons {
     font-size: 20px;
     color: var(--md-primary);
+}
+
+.embed-actions {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--md-outline-variant);
+    display: flex;
+    justify-content: center;
 }
 
 .code-wrapper {

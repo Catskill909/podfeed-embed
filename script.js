@@ -1064,14 +1064,24 @@ function applyUIVisibility(options) {
     // Store in state
     state.uiVisibility = { ...state.uiVisibility, ...options };
 
+    const appContainer = document.querySelector('.app-container');
+
     if (!options.header) {
         const header = document.querySelector('.app-header');
         if (header) header.style.display = 'none';
+        // Add class to adjust layout when header is hidden
+        if (appContainer) appContainer.classList.add('header-hidden');
+    } else {
+        if (appContainer) appContainer.classList.remove('header-hidden');
     }
 
     if (!options.selector) {
         const selector = document.querySelector('.podcast-selector-section');
         if (selector) selector.style.display = 'none';
+        // Add class to adjust layout when selector is hidden
+        if (appContainer) appContainer.classList.add('selector-hidden');
+    } else {
+        if (appContainer) appContainer.classList.remove('selector-hidden');
     }
 
     if (!options.cover) {

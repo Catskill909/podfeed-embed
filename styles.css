@@ -389,6 +389,29 @@ iframe .app-container,
     padding: var(--space-4);
 }
 
+/* Layout adjustments when header/selector are hidden */
+.app-container.header-hidden .main-content {
+    padding-top: 0;
+}
+
+.app-container.selector-hidden .main-content {
+    padding-top: var(--space-2);
+}
+
+.app-container.header-hidden.selector-hidden .main-content {
+    padding-top: 0;
+}
+
+/* Fix sticky positioning when header is hidden */
+.app-container.header-hidden .podcast-selector-section {
+    top: 0; /* Remove header offset when header is hidden */
+}
+
+/* Reduce spacing on first section when header is hidden */
+.app-container.header-hidden .podcast-info-section {
+    margin-top: 0;
+}
+
 /* PODCAST INFO SECTION (Cover + Metadata) */
 .podcast-info-section {
     display: flex;

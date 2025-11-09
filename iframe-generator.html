@@ -201,12 +201,26 @@
                 </div>
             </section>
 
-            <!-- Generate Button -->
-            <div class="action-buttons">
-                <button id="copy-embed-code" class="primary-button">
-                    <span class="material-icons">content_copy</span>
-                    Copy Embed Code
-                </button>
+            <!-- Embed Code Display with Integrated Button -->
+            <div class="embed-code-section">
+                <h3 class="embed-title">
+                    <span class="material-icons">code</span>
+                    Embed Code
+                </h3>
+                <div class="code-wrapper">
+                    <pre id="embed-code-display"
+                        class="code-block"><code>&lt;iframe src="index.html" width="100%" height="600px" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code></pre>
+                    <button id="copy-code-btn" class="copy-btn" title="Copy to clipboard">
+                        <span class="material-icons">content_copy</span>
+                    </button>
+                </div>
+                <!-- Main Copy Button Inside Container -->
+                <div class="embed-actions">
+                    <button id="copy-embed-code" class="primary-button">
+                        <span class="material-icons">content_copy</span>
+                        Copy Embed Code
+                    </button>
+                </div>
             </div>
 
             <!-- Preview Panel - Full Width -->
@@ -233,21 +247,6 @@
                     <div class="iframe-container" id="iframe-container">
                         <iframe id="preview-iframe" src="index.html" frameborder="0" allowfullscreen>
                         </iframe>
-                    </div>
-                </div>
-
-                <!-- Embed Code Display -->
-                <div class="embed-code-section">
-                    <h3 class="embed-title">
-                        <span class="material-icons">code</span>
-                        Embed Code
-                    </h3>
-                    <div class="code-wrapper">
-                        <pre id="embed-code-display"
-                            class="code-block"><code>&lt;iframe src="index.html" width="100%" height="600px" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code></pre>
-                        <button id="copy-code-btn" class="copy-btn" title="Copy to clipboard">
-                            <span class="material-icons">content_copy</span>
-                        </button>
                     </div>
                 </div>
             </main>
