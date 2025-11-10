@@ -197,6 +197,10 @@ class IframeGenerator {
         } else if (device === 'mobile') {
             container.classList.add('mobile');
         }
+
+        // Re-apply iframe dimensions after device change
+        // This ensures height setting takes effect in all device modes
+        this.updatePreview();
     }
 
     generateUrlParams() {
@@ -274,6 +278,8 @@ class IframeGenerator {
         const height = this.controls.heightValue.value + this.controls.heightUnit.value;
 
         // Apply dimensions to iframe itself for accurate preview
+        // Fix: These dimensions now work correctly across all device modes
+        // Previously tablet/mobile had hard-coded CSS heights that overrode JS
         iframe.style.width = width;
         iframe.style.height = height;
 
