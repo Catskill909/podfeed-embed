@@ -301,7 +301,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Oswald', sans-serif;
     font-weight: 700;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 /* ==========================================
@@ -749,8 +749,8 @@ iframe .app-container,
     font-family: 'Oswald', sans-serif;
     font-size: 18px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    text-transform: none;
+    letter-spacing: 0.5px;
     margin-bottom: var(--space-4);
     color: var(--primary);
     display: flex;
@@ -1695,33 +1695,102 @@ iframe .app-container,
 
 @media (max-width: 480px) {
     .player-bar {
-        padding: 10px 12px;
+        padding: 14px 12px 12px;
+    }
+    
+    /* Close button - more compact */
+    .player-close-btn {
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+    }
+    
+    .player-close-btn i {
+        font-size: 16px;
+    }
+    
+    /* Player info section */
+    .player-info {
+        padding: 0 32px 0 0;
+        gap: 4px;
     }
     
     .player-title {
         font-size: 13px;
+        line-height: 1.3;
     }
     
     .player-podcast {
         font-size: 11px;
     }
     
+    /* Control buttons - better proportions */
     .control-btn-compact {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
     }
     
     .control-btn-compact i {
-        font-size: 12px;
+        font-size: 14px;
     }
     
+    /* Play button - prominent but not oversized */
     .control-btn-play {
-        width: 40px;
-        height: 40px;
+        width: 52px;
+        height: 52px;
     }
     
     .control-btn-play i {
-        font-size: 36px;
+        font-size: 20px;
+    }
+    
+    /* Controls spacing */
+    .player-controls-compact {
+        gap: 8px;
+        padding: 0;
+    }
+    
+    /* Speed text smaller */
+    .speed-text {
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    /* Time display - more compact */
+    .time-display {
+        font-size: 11px;
+        gap: var(--space-2);
+    }
+    
+    /* Volume button - smaller for phone, keep at bottom */
+    #volume-btn {
+        width: 32px;
+        height: 32px;
+        bottom: 12px;
+        left: 12px;
+    }
+    
+    #volume-btn i {
+        font-size: 18px;
+    }
+    
+    /* Speed control - smaller for phone, keep at bottom */
+    .speed-control-compact {
+        bottom: 12px;
+        right: 12px;
+    }
+    
+    .speed-control-compact .control-btn-compact {
+        width: 44px;
+        height: 28px;
+        border-radius: 14px;
+        padding: 0 8px;
+    }
+    
+    .speed-control-compact .speed-text {
+        font-size: 11px;
+        font-weight: 600;
     }
 }
 
@@ -1941,9 +2010,9 @@ iframe .app-container,
     
     /* Compact episode images for mobile */
     .episode-image {
-        width: 40px;
-        height: 40px;
-        min-width: 40px;
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
         border-radius: 6px;
     }
     
