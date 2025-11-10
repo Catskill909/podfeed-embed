@@ -547,38 +547,7 @@ iframe .app-container,
     gap: var(--space-5);
 }
 
-/* ==========================================
-   PODCAST SELECTOR - COMPACT INLINE (STICKY)
-   ========================================== */
-.podcast-selector-section {
-    position: sticky;
-    top: 80px;
-    z-index: 100;
-    background: rgba(10, 10, 10, 0.98);
-    backdrop-filter: blur(10px);
-    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
-    margin-bottom: var(--space-4);
-    border-bottom: 1px solid var(--border);
-}
-
-.selector-container {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    max-width: 600px;
-    padding-left: var(--space-5);
-}
-
-.select-label {
-    font-family: 'Oswald', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--primary);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
+/* Duplicates removed - using the single definitions above at lines ~369 and ~376 */
 
 /* CUSTOM DROPDOWN */
 .custom-dropdown {
@@ -754,68 +723,7 @@ iframe .app-container,
     height: 100%;
 }
 
-/* ==========================================
-   PODCAST SELECTOR
-   ========================================== */
-.podcast-selector-section {
-    background: var(--surface);
-    padding: var(--spacing-lg);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--elevation-2);
-}
-
-.select-label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--on-surface-variant);
-    margin-bottom: var(--spacing-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.select-wrapper {
-    position: relative;
-}
-
-.podcast-select {
-    width: 100%;
-    padding: var(--spacing-md);
-    padding-right: var(--spacing-xxl);
-    background: var(--surface-variant);
-    color: var(--on-surface);
-    border: 2px solid transparent;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    appearance: none;
-}
-
-.podcast-select:hover {
-    background: #353535;
-}
-
-.podcast-select:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: var(--surface-variant);
-}
-
-.select-icon {
-    position: absolute;
-    right: var(--spacing-md);
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--on-surface-variant);
-    transition: transform var(--transition-normal);
-}
-
-.podcast-select:focus + .select-icon {
-    transform: translateY(-50%) rotate(180deg);
-}
+/* Old design system removed - using sticky podcast selector defined above */
 
 /* ==========================================
    EPISODES SECTION - WITH PLAY BUTTONS
@@ -1865,7 +1773,7 @@ iframe .app-container,
     }
     
     .podcast-selector-section {
-        top: 65px;
+        top: 48px; /* Adjusted to match actual tablet header height */
     }
     
     .selector-container {
@@ -1945,7 +1853,7 @@ iframe .app-container,
     }
     
     .podcast-selector-section {
-        top: 55px;
+        top: 38px; /* Adjusted to match actual mobile header height */
         padding: var(--space-3);
     }
     
