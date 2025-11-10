@@ -825,9 +825,15 @@ function createEpisodeElement(episode) {
     playBtn.addEventListener('click', (e) => {
         e.stopPropagation();
 
-        // If clicking on currently loaded episode, just toggle play/pause
+        // If clicking on currently loaded episode
         if (state.currentEpisode && state.currentEpisode.id === episode.id) {
-            togglePlayPause();
+            // If modal is closed, reopen it and play
+            if (!modalState.isOpen) {
+                openModal(true); // true = auto-start playback
+            } else {
+                // Modal is open, just toggle play/pause
+                togglePlayPause();
+            }
             return;
         }
 
