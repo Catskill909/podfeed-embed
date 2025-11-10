@@ -1874,12 +1874,29 @@ iframe .app-container,
     
     .episodes-section,
     .embed-section {
-        padding: var(--space-4);
+        padding: var(--space-3);
+    }
+    
+    /* Smaller podcast info section */
+    .podcast-info-section {
+        padding: var(--space-3);
+        gap: var(--space-3);
+        margin-bottom: var(--space-3);
     }
     
     .cover-art-container {
-        width: 140px;
-        height: 140px;
+        width: 100px;
+        height: 100px;
+        min-width: 100px;
+    }
+    
+    .podcast-title {
+        font-size: 18px;
+        margin-bottom: var(--space-1);
+    }
+    
+    .metadata-details {
+        font-size: 12px;
     }
     
     #episode-title {
@@ -1909,6 +1926,11 @@ iframe .app-container,
     }
     
     .section-title {
+        font-size: 14px;
+        margin-bottom: var(--space-3);
+    }
+    
+    .section-title i {
         font-size: 16px;
     }
     
@@ -1917,14 +1939,45 @@ iframe .app-container,
         gap: var(--space-2);
     }
     
+    /* Compact episode images for mobile */
     .episode-image {
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 6px;
     }
     
+    /* Smaller episode title */
     .episode-item-title {
-        font-size: 12px;
+        font-size: 11px;
+        line-height: 1.3;
+    }
+    
+    /* Smaller episode metadata */
+    .episode-meta {
+        font-size: 10px;
+        gap: var(--space-1);
+    }
+    
+    /* Compact play button for mobile */
+    .episode-play-btn {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+    }
+    
+    .episode-play-btn i {
+        font-size: 14px;
+    }
+    
+    /* Smaller download button */
+    .episode-download-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .episode-download-btn i {
+        font-size: 14px;
     }
     
     .error-toast {
